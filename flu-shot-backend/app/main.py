@@ -11,13 +11,8 @@ app = FastAPI(title="CVI Clinic API", version="1.0.0")
 # Allow React frontend to connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "https://doo-orpin.vercel.app",
-        "https://*.vercel.app",
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

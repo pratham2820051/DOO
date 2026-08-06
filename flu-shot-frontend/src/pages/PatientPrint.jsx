@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://doo-kxpn.onrender.com';
 
 function PatientPrint() {
   const { id } = useParams();

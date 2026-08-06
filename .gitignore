@@ -1,0 +1,14 @@
+# Backend secrets - NEVER push these
+flu-shot-backend/.env
+flu-shot-backend/*.db
+flu-shot-backend/__pycache__/
+flu-shot-backend/**/__pycache__/
+flu-shot-backend/**/*.pyc
+
+# Frontend
+flu-shot-frontend/node_modules/
+flu-shot-frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db

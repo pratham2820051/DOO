@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parental Questionnaire for Cerebral Visual Impairment (PQCVI)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 100%);
+      min-height: 100vh;
+      padding: 40px 16px;
+      color: #1a2340;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(30,64,175,.10), 0 1px 4px rgba(30,64,175,.06);
+      padding: 40px 44px 36px;
+    }
+
+    /* ── Header ── */
+    .header-band {
+      background: linear-gradient(90deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+      border-radius: 10px;
+      padding: 22px 28px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-icon { font-size: 32px; flex-shrink: 0; }
+    .title { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: .01em; line-height: 1.3; }
+
+    /* ── Intro card ── */
+    .intro-card {
+      background: #f0f6ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .intro { font-size: 15px; line-height: 1.65; color: #374151; }
+    .options-title {
+      font-size: 13px; font-weight: 600; color: #1e40af;
+      margin: 14px 0 6px; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .options { margin: 0; padding-left: 22px; line-height: 1.9; font-size: 14px; color: #374151; }
+
+    /* ── Age input ── */
+    .age-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #f8faff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .age-row label { font-size: 14px; font-weight: 600; color: #1e40af; white-space: nowrap; }
+    .age-row input[type="number"] {
+      width: 110px;
+      padding: 8px 12px;
+      border: 1.5px solid #93c5fd;
+      border-radius: 7px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1a2340;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .age-row input[type="number"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
+    .age-hint { font-size: 13px; color: #6b7280; font-style: italic; }
+
+    .note {
+      font-size: 13px; color: #6b7280; font-style: italic;
+      margin: 0 0 22px;
+      padding: 10px 14px;
+      background: #fafafa;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* ── Table ── */
+    .questionnaire {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid #dbeafe;
+    }
+    .questionnaire thead tr { background: linear-gradient(90deg, #1e40af 0%, #2563eb 100%); }
+    .questionnaire th {
+      padding: 12px 10px;
+      font-size: 12px; font-weight: 600;
+      color: #fff; text-align: center;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+
+    /* Answer header with sub-labels */
+    .answer-header-labels {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      margin-top: 7px;
+      border-top: 1px solid rgba(255,255,255,0.30);
+      padding-top: 5px;
+    }
+    .answer-header-labels span {
+      font-size: 10.5px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #ffffff;
+      text-align: center;
+      border-left: 1.5px solid rgba(255,255,255,0.45);
+      padding: 2px 4px;
+    }
+    .answer-header-labels span:first-child { border-left: none; }
+
+    .questionnaire tbody tr { transition: background .15s; }
+    .questionnaire tbody tr:nth-child(even) { background: #f5f8ff; }
+    .questionnaire tbody tr:nth-child(odd)  { background: #ffffff; }
+    .questionnaire tbody tr:hover           { background: #e0eaff; }
+    .questionnaire td { padding: 10px 10px; border-bottom: 1px solid #e9eef8; vertical-align: middle; }
+
+    .sno      { width: 5%;  text-align: center; font-weight: 600; color: #2563eb; font-size: 14px; }
+    .question { width: 57%; text-align: left; font-size: 14px; line-height: 1.55; color: #1f2937; }
+    .answer   { width: 38%; text-align: center; padding: 0 !important; }
+
+    /* Radio options — same 4-col grid as header labels */
+    .answer-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      align-items: stretch;
+      height: 100%;
+    }
+    .answer-options label {
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px 4px;
+      border-left: 1.5px solid #d1ddf5;
+      transition: background .15s;
+    }
+    .answer-options label:first-child { border-left: none; }
+    .answer-options label:hover { background: #dbeafe; }
+    .answer-options input[type="radio"] {
+      margin: 0; width: 15px; height: 15px;
+      cursor: pointer; accent-color: #2563eb; flex-shrink: 0;
+    }
+
+    /* ── Buttons ── */
+    .actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; }
+    button {
+      padding: 11px 28px; border: none; border-radius: 8px;
+      cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit;
+      transition: background .18s, box-shadow .18s, transform .1s;
+      letter-spacing: .02em;
+    }
+    button[type="reset"] {
+      background: #f1f5f9; color: #475569; border: 1.5px solid #cbd5e1;
+    }
+    button[type="reset"]:hover {
+      background: #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,.08); transform: translateY(-1px);
+    }
+    button[type="button"] {
+      background: linear-gradient(90deg,#1e40af 0%,#2563eb 100%);
+      color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.25);
+    }
+    button[type="button"]:hover {
+      background: linear-gradient(90deg,#1e3a8a 0%,#1d4ed8 100%);
+      box-shadow: 0 4px 14px rgba(37,99,235,.35); transform: translateY(-1px);
+    }
+    button[type="submit"] {
+      background: linear-gradient(90deg,#15803d 0%,#16a34a 100%);
+      color: #fff; box-shadow: 0 2px 8px rgba(22,163,74,.25);
+    }
+    button[type="submit"]:hover {
+      background: linear-gradient(90deg,#14532d 0%,#15803d 100%);
+      box-shadow: 0 4px 14px rgba(22,163,74,.35); transform: translateY(-1px);
+    }
+    button:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+
+    /* ── Feedback banner ── */
+    .result-banner {
+      display: none;
+      margin-top: 20px; padding: 14px 20px;
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      text-align: center; line-height: 1.5;
+    }
+    .result-banner.error   { display: block; background: #fff1f2; border: 1.5px solid #fca5a5; color: #b91c1c; }
+    .result-banner.loading { display: block; background: #eff6ff; border: 1.5px solid #93c5fd; color: #1e40af; }
+
+    /* ── Result card ── */
+    .result-card {
+      display: none;
+      margin-top: 28px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid #dbeafe;
+      box-shadow: 0 2px 12px rgba(30,64,175,.08);
+    }
+    .result-card.visible { display: block; }
+
+    .result-header {
+      padding: 20px 28px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .result-header.good { background: linear-gradient(90deg,#15803d,#16a34a); }
+    .result-header.bad  { background: linear-gradient(90deg,#b91c1c,#dc2626); }
+    .result-icon    { font-size: 30px; }
+    .result-title   { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: .06em; }
+    .result-verdict { font-size: 26px; font-weight: 700; color: #fff; }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 1px;
+      background: #e2e8f0;
+    }
+    .result-cell {
+      background: #fff;
+      padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .result-cell-label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .06em; }
+    .result-cell-value { font-size: 18px; font-weight: 700; color: #1a2340; }
+    .result-cell-value.good { color: #15803d; }
+    .result-cell-value.bad  { color: #b91c1c; }
+
+    .result-footer {
+      padding: 12px 22px;
+      background: #f8faff;
+      font-size: 13px; color: #6b7280;
+      text-align: center; font-style: italic;
+      border-top: 1px solid #e9eef8;
+    }
+
+    /* ── Stream card (ventral, dorsal, etc.) ── */
+    .stream-card {
+      display: none;
+      margin-top: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid #dbeafe;
+      box-shadow: 0 2px 12px rgba(30,64,175,.06);
+    }
+    .stream-card.visible { display: block; }
+
+    .stream-header {
+      padding: 14px 22px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .stream-header.good { background: linear-gradient(90deg,#15803d,#16a34a); }
+    .stream-header.bad  { background: linear-gradient(90deg,#b91c1c,#dc2626); }
+    .stream-header-icon    { font-size: 22px; }
+    .stream-header-title   { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.8); text-transform: uppercase; letter-spacing: .06em; }
+    .stream-header-verdict { font-size: 20px; font-weight: 700; color: #fff; }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      body { padding: 16px 8px; }
+      .container { padding: 20px 12px 24px; border-radius: 10px; }
+      .header-band { padding: 14px 16px; }
+      .title { font-size: 15px; }
+      .questionnaire th, .questionnaire td { font-size: 12px; }
+      .sno { width: 7%; } .question { width: 45%; } .answer { width: 48%; }
+      .answer-options label { padding: 10px 2px; }
+      .answer-header-labels span { font-size: 9px; padding: 2px 1px; }
+      .actions { flex-direction: column; align-items: center; }
+      button { width: 100%; max-width: 260px; }
+      .result-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; border-radius: 0; padding: 10px 12px; max-width: none; }
+      .header-band {
+        background: #1e40af !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        border-radius: 6px; padding: 14px 18px;
+      }
+      .actions, .result-banner { display: none; }
+      .questionnaire thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .questionnaire th, .questionnaire td { font-size: 10px; padding: 5px 4px; }
+      .questionnaire tbody tr:nth-child(even) {
+        background: #f5f8ff !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header-band">
+    <div class="header-icon">👁️</div>
+    <div class="title">Parental Questionnaire for Cerebral Visual Impairment (PQCVI)</div>
+  </div>
+
+  <div class="intro-card">
+    <div class="intro">
+      The questions below are related to the visual perception-related behavior of your child.
+      Read these questions and choose the best answer for your child.
+    </div>
+    <div class="options-title">Answer Scale</div>
+    <ol class="options">
+      <li>Never</li>
+      <li>Occasionally</li>
+      <li>Most of the time</li>
+      <li>Always</li>
+    </ol>
+  </div>
+
+  <div class="note">
+    ℹ️ The items in this list are ordered from the highest to the lowest mean score.
+  </div>
+
+  <form id="pqcviForm">
+
+    <!-- Age input -->
+    <div class="age-row">
+      <label for="childAge">Child's Age (years):</label>
+      <input type="number" id="childAge" name="age"
+             min="3" max="6" step="0.1"
+             placeholder="e.g. 4.5" required>
+      <span class="age-hint">Supported range: 3 – 6 years</span>
+    </div>
+
+    <table class="questionnaire">
+      <thead>
+        <tr>
+          <th class="sno">S.No</th>
+          <th class="question">Question</th>
+          <th class="answer">
+            <div>Answer</div>
+            <div class="answer-header-labels">
+              <span>Never</span>
+              <span>Occasionally</span>
+              <span>Most of the time</span>
+              <span>Always</span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="sno">1.</td>
+          <td class="question">Does your child recognize their mother's or father's face before you speak?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q1" value="1"></label>
+            <label><input type="radio" name="q1" value="2"></label>
+            <label><input type="radio" name="q1" value="3"></label>
+            <label><input type="radio" name="q1" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">2.</td>
+          <td class="question">Can your child reach out and grasp objects?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q2" value="1"></label>
+            <label><input type="radio" name="q2" value="2"></label>
+            <label><input type="radio" name="q2" value="3"></label>
+            <label><input type="radio" name="q2" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">3.</td>
+          <td class="question">Is your child able to track slow-moving objects, such as a rolling ball?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q3" value="1"></label>
+            <label><input type="radio" name="q3" value="2"></label>
+            <label><input type="radio" name="q3" value="3"></label>
+            <label><input type="radio" name="q3" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">4.</td>
+          <td class="question">Does your child recognize the faces of other family members?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q4" value="1"></label>
+            <label><input type="radio" name="q4" value="2"></label>
+            <label><input type="radio" name="q4" value="3"></label>
+            <label><input type="radio" name="q4" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">5.</td>
+          <td class="question">Can your child identify familiar objects like a cup, shoes, or a doll?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q5" value="1"></label>
+            <label><input type="radio" name="q5" value="2"></label>
+            <label><input type="radio" name="q5" value="3"></label>
+            <label><input type="radio" name="q5" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">6.</td>
+          <td class="question">Can your child locate objects hidden under a blanket or paper?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q6" value="1"></label>
+            <label><input type="radio" name="q6" value="2"></label>
+            <label><input type="radio" name="q6" value="3"></label>
+            <label><input type="radio" name="q6" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">7.</td>
+          <td class="question">Is your child able to pick up a small object with their thumb and index finger?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q7" value="1"></label>
+            <label><input type="radio" name="q7" value="2"></label>
+            <label><input type="radio" name="q7" value="3"></label>
+            <label><input type="radio" name="q7" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">8.</td>
+          <td class="question">Can your child track fast-moving objects, such as a moving car?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q8" value="1"></label>
+            <label><input type="radio" name="q8" value="2"></label>
+            <label><input type="radio" name="q8" value="3"></label>
+            <label><input type="radio" name="q8" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">9.</td>
+          <td class="question">Does your child eat food from different parts of a large plate rather than just one area?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q9" value="1"></label>
+            <label><input type="radio" name="q9" value="2"></label>
+            <label><input type="radio" name="q9" value="3"></label>
+            <label><input type="radio" name="q9" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">10.</td>
+          <td class="question">Can your child recognize other people in photographs?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q10" value="1"></label>
+            <label><input type="radio" name="q10" value="2"></label>
+            <label><input type="radio" name="q10" value="3"></label>
+            <label><input type="radio" name="q10" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">11.</td>
+          <td class="question">Can your child recognize themselves in photographs?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q11" value="1"></label>
+            <label><input type="radio" name="q11" value="2"></label>
+            <label><input type="radio" name="q11" value="3"></label>
+            <label><input type="radio" name="q11" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">12.</td>
+          <td class="question">Can your child navigate well around their home, finding rooms and the toilet easily?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q12" value="1"></label>
+            <label><input type="radio" name="q12" value="2"></label>
+            <label><input type="radio" name="q12" value="3"></label>
+            <label><input type="radio" name="q12" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">13.</td>
+          <td class="question">Does your child recognize their friends' faces?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q13" value="1"></label>
+            <label><input type="radio" name="q13" value="2"></label>
+            <label><input type="radio" name="q13" value="3"></label>
+            <label><input type="radio" name="q13" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">14.</td>
+          <td class="question">Can your child easily locate doorways and navigate along corridors?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q14" value="1"></label>
+            <label><input type="radio" name="q14" value="2"></label>
+            <label><input type="radio" name="q14" value="3"></label>
+            <label><input type="radio" name="q14" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">15.</td>
+          <td class="question">Can your child judge the height of steps without tripping?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q15" value="1"></label>
+            <label><input type="radio" name="q15" value="2"></label>
+            <label><input type="radio" name="q15" value="3"></label>
+            <label><input type="radio" name="q15" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">16.</td>
+          <td class="question">Can your child identify objects while they are moving quickly themselves?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q16" value="1"></label>
+            <label><input type="radio" name="q16" value="2"></label>
+            <label><input type="radio" name="q16" value="3"></label>
+            <label><input type="radio" name="q16" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">17.</td>
+          <td class="question">Can your child find objects on a blanket with a complex pattern?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q17" value="1"></label>
+            <label><input type="radio" name="q17" value="2"></label>
+            <label><input type="radio" name="q17" value="3"></label>
+            <label><input type="radio" name="q17" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">18.</td>
+          <td class="question">Does your child have a good memory for where they put things at home?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q18" value="1"></label>
+            <label><input type="radio" name="q18" value="2"></label>
+            <label><input type="radio" name="q18" value="3"></label>
+            <label><input type="radio" name="q18" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">19.</td>
+          <td class="question">Can your child differentiate between shapes like triangles, rectangles, and circles?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q19" value="1"></label>
+            <label><input type="radio" name="q19" value="2"></label>
+            <label><input type="radio" name="q19" value="3"></label>
+            <label><input type="radio" name="q19" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">20.</td>
+          <td class="question">Can your child sort or match colors?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q20" value="1"></label>
+            <label><input type="radio" name="q20" value="2"></label>
+            <label><input type="radio" name="q20" value="3"></label>
+            <label><input type="radio" name="q20" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">21.</td>
+          <td class="question">Can your child name colors?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q21" value="1"></label>
+            <label><input type="radio" name="q21" value="2"></label>
+            <label><input type="radio" name="q21" value="3"></label>
+            <label><input type="radio" name="q21" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">22.</td>
+          <td class="question">Can your child find objects within a complex picture?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q22" value="1"></label>
+            <label><input type="radio" name="q22" value="2"></label>
+            <label><input type="radio" name="q22" value="3"></label>
+            <label><input type="radio" name="q22" value="4"></label>
+          </div></td>
+        </tr>
+        <tr>
+          <td class="sno">23.</td>
+          <td class="question">Does your child adapt well to new surroundings, navigating easily?</td>
+          <td class="answer"><div class="answer-options">
+            <label><input type="radio" name="q23" value="1"></label>
+            <label><input type="radio" name="q23" value="2"></label>
+            <label><input type="radio" name="q23" value="3"></label>
+            <label><input type="radio" name="q23" value="4"></label>
+          </div></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="actions">
+      <button type="reset" onclick="clearResult()">🗑️ Clear Answers</button>
+      <button type="button" onclick="window.print()">🖨️ Print</button>
+      <button type="submit" id="submitBtn">✔ Submit</button>
+    </div>
+
+    <div class="result-banner" id="resultBanner"></div>
+
+    <!-- Overall result card -->
+    <div class="result-card" id="resultCard">
+      <div class="result-header" id="resultHeader">
+        <div class="result-icon" id="resultIcon"></div>
+        <div>
+          <div class="result-title">Overall Assessment (23 Questions)</div>
+          <div class="result-verdict" id="resultVerdict"></div>
+        </div>
+      </div>
+      <div class="result-grid" id="resultGrid"></div>
+      <div class="result-footer" id="resultFooter"></div>
+    </div>
+
+    <!-- Ventral-stream card -->
+    <div class="stream-card" id="ventralCard">
+      <div class="stream-header" id="ventralHeader">
+        <div class="stream-header-icon" id="ventralIcon"></div>
+        <div>
+          <div class="stream-header-title">Ventral-stream Function (Q1,Q4,Q5,Q10,Q11,Q13,Q19,Q20,Q21)</div>
+          <div class="stream-header-verdict" id="ventralVerdict"></div>
+        </div>
+      </div>
+      <div class="result-grid" id="ventralGrid"></div>
+      <div class="result-footer" id="ventralFooter"></div>
+    </div>
+
+    <!-- Dorsal-stream card -->
+    <div class="stream-card" id="dorsalCard">
+      <div class="stream-header" id="dorsalHeader">
+        <div class="stream-header-icon" id="dorsalIcon"></div>
+        <div>
+          <div class="stream-header-title">Dorsal-stream Function (Q2,Q3,Q6,Q7,Q8,Q9,Q12,Q14,Q15,Q16,Q17,Q18,Q22,Q23)</div>
+          <div class="stream-header-verdict" id="dorsalVerdict"></div>
+        </div>
+      </div>
+      <div class="result-grid" id="dorsalGrid"></div>
+      <div class="result-footer" id="dorsalFooter"></div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  const TOTAL = 23;
+
+  document.getElementById('pqcviForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const banner = document.getElementById('resultBanner');
+    const card   = document.getElementById('resultCard');
+    const vCard  = document.getElementById('ventralCard');
+    const dCard  = document.getElementById('dorsalCard');
+    const btn    = document.getElementById('submitBtn');
+
+    card.classList.remove('visible');
+    vCard.classList.remove('visible');
+    dCard.classList.remove('visible');
+    banner.className = 'result-banner';
+    banner.textContent = '';
+
+    // Client-side pre-checks (UX only — backend recalculates everything)
+    const age = parseFloat(document.getElementById('childAge').value);
+    if (isNaN(age) || age < 3 || age > 6) {
+      showBanner('error', '⚠ Please enter a valid child age between 3 and 6 years.');
+      return;
+    }
+
+    const unanswered = [];
+    for (let i = 1; i <= TOTAL; i++) {
+      if (!this.querySelector(`input[name="q${i}"]:checked`)) unanswered.push(i);
+    }
+    if (unanswered.length > 0) {
+      const noun = unanswered.length > 1 ? 'questions' : 'question';
+      showBanner('error', `⚠ Please answer ${noun}: ${unanswered.join(', ')}.`);
+      return;
+    }
+
+    // Build payload
+    const payload = { age };
+    for (let i = 1; i <= TOTAL; i++) {
+      payload[`q${i}`] = parseInt(this.querySelector(`input[name="q${i}"]:checked`).value);
+    }
+
+    btn.disabled = true;
+    showBanner('loading', '⏳ Calculating results…');
+
+    try {
+      const res  = await fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showBanner('error', `⚠ ${data.error || 'An error occurred. Please try again.'}`);
+        return;
+      }
+
+      banner.className = 'result-banner';
+      renderOverall(data);
+      renderVentral(data);
+      renderDorsal(data);
+
+    } catch (err) {
+      showBanner('error', '⚠ Could not reach the server. Make sure Flask is running.');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function showBanner(type, msg) {
+    const banner = document.getElementById('resultBanner');
+    banner.className = `result-banner ${type}`;
+    banner.textContent = msg;
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Overall 23-question result ──────────────────────────────────────────────
+  function renderOverall(d) {
+    const isIssue = d.overall_result === 'ISSUE DETECTED';
+
+    document.getElementById('resultHeader').className  = `result-header ${isIssue ? 'bad' : 'good'}`;
+    document.getElementById('resultIcon').textContent  = isIssue ? '⚠️' : '✅';
+    document.getElementById('resultVerdict').textContent = d.overall_result;
+
+    const cells = [
+      { label: 'Age',           value: `${d.age} yrs` },
+      { label: 'Age Group',     value: d.age_group },
+      { label: 'Total Score',   value: `${d.total_score} / ${d.maximum_score}` },
+      { label: 'Average Score', value: `${d.average_score} / 4` },
+      { label: '2SD Cutoff',    value: `${d.overall_cutoff}` },
+      { label: 'Result',        value: d.overall_result, cls: isIssue ? 'bad' : 'good' },
+    ];
+
+    document.getElementById('resultGrid').innerHTML = renderCells(cells);
+    document.getElementById('resultFooter').textContent = isIssue
+      ? `Overall total score ${d.total_score} is at or above the ${d.age_group} 2SD cutoff of ${d.overall_cutoff} — issue detected.`
+      : `Overall total score ${d.total_score} is below the ${d.age_group} 2SD cutoff of ${d.overall_cutoff} — no issue detected.`;
+
+    document.getElementById('resultCard').classList.add('visible');
+  }
+
+  // ── Ventral-stream result ───────────────────────────────────────────────────
+  function renderVentral(d) {
+    const isIssue = d.ventral_result === 'ISSUE DETECTED';
+
+    document.getElementById('ventralHeader').className   = `stream-header ${isIssue ? 'bad' : 'good'}`;
+    document.getElementById('ventralIcon').textContent   = isIssue ? '⚠️' : '✅';
+    document.getElementById('ventralVerdict').textContent = d.ventral_result;
+
+    const cells = [
+      { label: 'Ventral Total',   value: `${d.ventral_total} / ${d.ventral_maximum}` },
+      { label: 'Ventral Average', value: `${d.ventral_average} / 4` },
+      { label: '2SD Cutoff',      value: `${d.ventral_cutoff}` },
+      { label: 'Result',          value: d.ventral_result, cls: isIssue ? 'bad' : 'good' },
+    ];
+
+    document.getElementById('ventralGrid').innerHTML = renderCells(cells);
+    document.getElementById('ventralFooter').textContent = isIssue
+      ? `Ventral-stream total ${d.ventral_total} is at or above the ${d.age_group} 2SD cutoff of ${d.ventral_cutoff} — issue detected.`
+      : `Ventral-stream total ${d.ventral_total} is below the ${d.age_group} 2SD cutoff of ${d.ventral_cutoff} — no issue detected.`;
+
+    document.getElementById('ventralCard').classList.add('visible');
+    document.getElementById('ventralCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Dorsal-stream result ────────────────────────────────────────────────────
+  function renderDorsal(d) {
+    const isIssue = d.dorsal_result === 'ISSUE DETECTED';
+
+    document.getElementById('dorsalHeader').className    = `stream-header ${isIssue ? 'bad' : 'good'}`;
+    document.getElementById('dorsalIcon').textContent    = isIssue ? '⚠️' : '✅';
+    document.getElementById('dorsalVerdict').textContent = d.dorsal_result;
+
+    const cells = [
+      { label: 'Dorsal Total',   value: `${d.dorsal_total} / ${d.dorsal_maximum}` },
+      { label: 'Dorsal Average', value: `${d.dorsal_average} / 4` },
+      { label: '2SD Cutoff',     value: `${d.dorsal_cutoff}` },
+      { label: 'Result',         value: d.dorsal_result, cls: isIssue ? 'bad' : 'good' },
+    ];
+
+    document.getElementById('dorsalGrid').innerHTML = renderCells(cells);
+    document.getElementById('dorsalFooter').textContent = isIssue
+      ? `Dorsal-stream total ${d.dorsal_total} is at or above the ${d.age_group} 2SD cutoff of ${d.dorsal_cutoff} — issue detected.`
+      : `Dorsal-stream total ${d.dorsal_total} is below the ${d.age_group} 2SD cutoff of ${d.dorsal_cutoff} — no issue detected.`;
+
+    document.getElementById('dorsalCard').classList.add('visible');
+    document.getElementById('dorsalCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // ── Shared cell renderer ────────────────────────────────────────────────────
+  function renderCells(cells) {
+    return cells.map(c => `
+      <div class="result-cell">
+        <span class="result-cell-label">${c.label}</span>
+        <span class="result-cell-value ${c.cls || ''}">${c.value}</span>
+      </div>`).join('');
+  }
+
+  function clearResult() {
+    document.getElementById('resultBanner').className = 'result-banner';
+    document.getElementById('resultBanner').textContent = '';
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('ventralCard').classList.remove('visible');
+    document.getElementById('dorsalCard').classList.remove('visible');
+  }
+</script>
+</body>
+</html>

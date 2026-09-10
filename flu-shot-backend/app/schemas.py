@@ -81,6 +81,7 @@ class PatientCreate(BaseModel):
     cvi_range38_data: Optional[str] = None
     cvi_range910_data: Optional[str] = None
     icf_framework_data: Optional[str] = None
+    pqcvi_data: Optional[str] = None
 
 
 class PatientResponse(PatientCreate):

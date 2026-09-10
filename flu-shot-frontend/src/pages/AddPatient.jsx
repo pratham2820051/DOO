@@ -6,6 +6,7 @@ import CVIScreening from './forms/CVIScreening';
 import CVIRange38 from './forms/CVIRange38';
 import CVIRange910 from './forms/CVIRange910';
 import ICFFramework from './forms/ICFFramework';
+import PQCVI from './forms/PQCVI';
 import { createPatient } from '../api/api';
 
 const tabs = [
@@ -15,6 +16,7 @@ const tabs = [
   { id: 'range38', label: 'CVI Range 3-8' },
   { id: 'range910', label: 'CVI Range 9-10' },
   { id: 'icf', label: 'ICF Framework' },
+  { id: 'pqcvi', label: 'PQCVI' },
 ];
 
 function AddPatient() {
@@ -38,6 +40,7 @@ function AddPatient() {
   const handleRange38Change = (json) => setPatientData(prev => ({ ...prev, cvi_range38_data: json }));
   const handleRange910Change = (json) => setPatientData(prev => ({ ...prev, cvi_range910_data: json }));
   const handleICFChange = (json) => setPatientData(prev => ({ ...prev, icf_framework_data: json }));
+  const handlePQCVIChange = (json) => setPatientData(prev => ({ ...prev, pqcvi_data: json }));
 
   const handleSave = async () => {
     const required = ['name', 'op_no', 'date', 'sex', 'age', 'guardian_name', 'address'];
@@ -69,6 +72,7 @@ function AddPatient() {
       case 'range38': return <CVIRange38 onDataChange={handleRange38Change} />;
       case 'range910': return <CVIRange910 onDataChange={handleRange910Change} />;
       case 'icf': return <ICFFramework onDataChange={handleICFChange} />;
+      case 'pqcvi': return <PQCVI onDataChange={handlePQCVIChange} />;
       default: return <BasicInfo onDataChange={handleBasicChange} />;
     }
   };
@@ -98,7 +102,7 @@ function AddPatient() {
         </div>
       )}
 
-      {/* Submit button only on last tab */}
+      {/* Submit button only on last tab (PQCVI) */}
       {isLastTab && (
         <div className="submit-bar">
           {saveMsg && (

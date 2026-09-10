@@ -80,5 +80,6 @@ class Patient(Base):
     cvi_range38_data = Column(Text)      # JSON string
     cvi_range910_data = Column(Text)     # JSON string
     icf_framework_data = Column(Text)    # JSON string
+    pqcvi_data = Column(Text)            # JSON string - PQCVI questionnaire + scores
 
     created_at = Column(DateTime, server_default=func.now())

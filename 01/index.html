@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parental Questionnaire for Cerebral Visual Impairment (PQCVI)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e8f0fe 100%);
+      min-height: 100vh;
+      padding: 40px 16px;
+      color: #1a2340;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(30, 64, 175, 0.10), 0 1px 4px rgba(30, 64, 175, 0.06);
+      padding: 40px 44px 36px;
+    }
+
+    /* Header */
+    .header-band {
+      background: linear-gradient(90deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+      border-radius: 10px;
+      padding: 22px 28px;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.01em;
+      line-height: 1.3;
+    }
+
+    /* Intro section */
+    .intro-card {
+      background: #f0f6ff;
+      border-left: 4px solid #2563eb;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .intro {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #374151;
+    }
+
+    .options-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e40af;
+      margin: 18px 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .options {
+      margin: 0 0 6px 0;
+      padding-left: 24px;
+      line-height: 1.9;
+      font-size: 14px;
+      color: #374151;
+    }
+
+    .options li {
+      padding-left: 4px;
+    }
+
+    .note {
+      font-size: 13px;
+      color: #6b7280;
+      font-style: italic;
+      margin: 14px 0 24px;
+      padding: 10px 14px;
+      background: #fafafa;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Table */
+    .questionnaire {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1.5px solid #dbeafe;
+    }
+
+    .questionnaire thead tr {
+      background: linear-gradient(90deg, #1e40af 0%, #2563eb 100%);
+    }
+
+    .questionnaire th {
+      padding: 13px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .questionnaire tbody tr {
+      transition: background 0.15s;
+    }
+
+    .questionnaire tbody tr:nth-child(even) {
+      background: #f5f8ff;
+    }
+
+    .questionnaire tbody tr:nth-child(odd) {
+      background: #ffffff;
+    }
+
+    .questionnaire tbody tr:hover {
+      background: #e0eaff;
+    }
+
+    .questionnaire td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #e9eef8;
+      vertical-align: middle;
+    }
+
+    .sno {
+      width: 6%;
+      text-align: center;
+      font-weight: 600;
+      color: #2563eb;
+      font-size: 14px;
+    }
+
+    .question {
+      width: 60%;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.55;
+      color: #1f2937;
+    }
+
+    .answer {
+      width: 34%;
+      text-align: center;
+    }
+
+    .answer-options {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      flex-wrap: nowrap;
+    }
+
+    .answer-options label {
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 13px;
+      color: #374151;
+      font-weight: 500;
+      padding: 5px 8px;
+      border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .answer-options label:hover {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .answer-options input[type="radio"] {
+      margin: 0;
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+
+    /* Highlight selected label */
+    .answer-options input[type="radio"]:checked + span {
+      color: #1e40af;
+      font-weight: 600;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 11px 28px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+
+    button[type="reset"] {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1.5px solid #cbd5e1;
+    }
+
+    button[type="reset"]:hover {
+      background: #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transform: translateY(-1px);
+    }
+
+    button[type="button"] {
+      background: linear-gradient(90deg, #1e40af 0%, #2563eb 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+    }
+
+    button[type="button"]:hover {
+      background: linear-gradient(90deg, #1e3a8a 0%, #1d4ed8 100%);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+
+    button[type="submit"] {
+      background: linear-gradient(90deg, #15803d 0%, #16a34a 100%);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+    }
+
+    button[type="submit"]:hover {
+      background: linear-gradient(90deg, #14532d 0%, #15803d 100%);
+      box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* Result banner */
+    .result-banner {
+      display: none;
+      margin-top: 24px;
+      padding: 18px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .result-banner.success {
+      display: block;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      color: #15803d;
+    }
+
+    .result-banner.error {
+      display: block;
+      background: #fff1f2;
+      border: 1.5px solid #fca5a5;
+      color: #b91c1c;
+    }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      body {
+        padding: 16px 8px;
+      }
+
+      .container {
+        padding: 22px 14px 24px;
+        border-radius: 10px;
+      }
+
+      .header-band {
+        padding: 16px 16px;
+      }
+
+      .title {
+        font-size: 16px;
+      }
+
+      .header-icon {
+        font-size: 24px;
+      }
+
+      .intro-card {
+        padding: 12px 14px;
+      }
+
+      .intro {
+        font-size: 14px;
+      }
+
+      .questionnaire th,
+      .questionnaire td {
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+
+      .sno { width: 9%; }
+      .question { width: 52%; }
+      .answer { width: 39%; }
+
+      .answer-options {
+        gap: 0;
+        flex-wrap: nowrap;
+      }
+
+      .answer-options label {
+        padding: 4px 5px;
+        font-size: 11px;
+        gap: 2px;
+      }
+
+      .answer-options input[type="radio"] {
+        width: 12px;
+        height: 12px;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      button {
+        width: 100%;
+        max-width: 260px;
+      }
+    }
+
+    /* Print */
+    @media print {
+      body {
+        background: #fff;
+        padding: 0;
+      }
+
+      .container {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 10px 12px;
+        max-width: none;
+      }
+
+      .header-band {
+        background: #1e40af !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border-radius: 6px;
+        padding: 14px 18px;
+      }
+
+      .actions {
+        display: none;
+      }
+
+      .questionnaire thead tr {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .questionnaire th,
+      .questionnaire td {
+        font-size: 11px;
+        padding: 6px 6px;
+      }
+
+      .questionnaire tbody tr:nth-child(even) {
+        background: #f5f8ff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="header-band">
+      <div class="title">Parental Questionnaire for Cerebral Visual Impairment (PQCVI)</div>
+    </div>
+
+    <div class="intro-card">
+      <div class="intro">
+        The questions below are related to the visual perception-related behavior of your child.
+        Read these questions and choose the best answer for your child.
+      </div>
+
+      <div class="options-title">Answer Options</div>
+      <ol class="options">
+        <li>Never.</li>
+        <li>Occasionally.</li>
+        <li>Most of the time.</li>
+        <li>Always.</li>
+      </ol>
+    </div>
+
+
+    <form id="pqcviForm">
+      <table class="questionnaire">
+        <thead>
+          <tr>
+            <th class="sno">S.No</th>
+            <th class="question">Question</th>
+            <th class="answer">Answer</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td class="sno">1.</td>
+            <td class="question">Does your child recognize their mother's or father's face before you speak?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q1" value="1"> (1)</label>
+                <label><input type="radio" name="q1" value="2"> (2)</label>
+                <label><input type="radio" name="q1" value="3"> (3)</label>
+                <label><input type="radio" name="q1" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">2.</td>
+            <td class="question">Can your child reach out and grasp objects?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q2" value="1"> (1)</label>
+                <label><input type="radio" name="q2" value="2"> (2)</label>
+                <label><input type="radio" name="q2" value="3"> (3)</label>
+                <label><input type="radio" name="q2" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">3.</td>
+            <td class="question">Is your child able to track slow-moving objects, such as a rolling ball?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q3" value="1"> (1)</label>
+                <label><input type="radio" name="q3" value="2"> (2)</label>
+                <label><input type="radio" name="q3" value="3"> (3)</label>
+                <label><input type="radio" name="q3" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">4.</td>
+            <td class="question">Does your child recognize the faces of other family members?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q4" value="1"> (1)</label>
+                <label><input type="radio" name="q4" value="2"> (2)</label>
+                <label><input type="radio" name="q4" value="3"> (3)</label>
+                <label><input type="radio" name="q4" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">5.</td>
+            <td class="question">Can your child identify familiar objects like a cup, shoes, or a doll?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q5" value="1"> (1)</label>
+                <label><input type="radio" name="q5" value="2"> (2)</label>
+                <label><input type="radio" name="q5" value="3"> (3)</label>
+                <label><input type="radio" name="q5" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">6.</td>
+            <td class="question">Can your child locate objects hidden under a blanket or paper?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q6" value="1"> (1)</label>
+                <label><input type="radio" name="q6" value="2"> (2)</label>
+                <label><input type="radio" name="q6" value="3"> (3)</label>
+                <label><input type="radio" name="q6" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">7.</td>
+            <td class="question">Is your child able to pick up a small object with their thumb and index finger?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q7" value="1"> (1)</label>
+                <label><input type="radio" name="q7" value="2"> (2)</label>
+                <label><input type="radio" name="q7" value="3"> (3)</label>
+                <label><input type="radio" name="q7" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">8.</td>
+            <td class="question">Can your child track fast-moving objects, such as a moving car?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q8" value="1"> (1)</label>
+                <label><input type="radio" name="q8" value="2"> (2)</label>
+                <label><input type="radio" name="q8" value="3"> (3)</label>
+                <label><input type="radio" name="q8" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">9.</td>
+            <td class="question">Does your child eat food from different parts of a large plate rather than just one area?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q9" value="1"> (1)</label>
+                <label><input type="radio" name="q9" value="2"> (2)</label>
+                <label><input type="radio" name="q9" value="3"> (3)</label>
+                <label><input type="radio" name="q9" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">10.</td>
+            <td class="question">Can your child recognize other people in photographs?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q10" value="1"> (1)</label>
+                <label><input type="radio" name="q10" value="2"> (2)</label>
+                <label><input type="radio" name="q10" value="3"> (3)</label>
+                <label><input type="radio" name="q10" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">11.</td>
+            <td class="question">Can your child recognize themselves in photographs?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q11" value="1"> (1)</label>
+                <label><input type="radio" name="q11" value="2"> (2)</label>
+                <label><input type="radio" name="q11" value="3"> (3)</label>
+                <label><input type="radio" name="q11" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">12.</td>
+            <td class="question">Can your child navigate well around their home, finding rooms and the toilet easily?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q12" value="1"> (1)</label>
+                <label><input type="radio" name="q12" value="2"> (2)</label>
+                <label><input type="radio" name="q12" value="3"> (3)</label>
+                <label><input type="radio" name="q12" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">13.</td>
+            <td class="question">Does your child recognize their friends' faces?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q13" value="1"> (1)</label>
+                <label><input type="radio" name="q13" value="2"> (2)</label>
+                <label><input type="radio" name="q13" value="3"> (3)</label>
+                <label><input type="radio" name="q13" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">14.</td>
+            <td class="question">Can your child easily locate doorways and navigate along corridors?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q14" value="1"> (1)</label>
+                <label><input type="radio" name="q14" value="2"> (2)</label>
+                <label><input type="radio" name="q14" value="3"> (3)</label>
+                <label><input type="radio" name="q14" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">15.</td>
+            <td class="question">Can your child judge the height of steps without tripping?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q15" value="1"> (1)</label>
+                <label><input type="radio" name="q15" value="2"> (2)</label>
+                <label><input type="radio" name="q15" value="3"> (3)</label>
+                <label><input type="radio" name="q15" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">16.</td>
+            <td class="question">Can your child identify objects while they are moving quickly themselves?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q16" value="1"> (1)</label>
+                <label><input type="radio" name="q16" value="2"> (2)</label>
+                <label><input type="radio" name="q16" value="3"> (3)</label>
+                <label><input type="radio" name="q16" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">17.</td>
+            <td class="question">Can your child find objects on a blanket with a complex pattern?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q17" value="1"> (1)</label>
+                <label><input type="radio" name="q17" value="2"> (2)</label>
+                <label><input type="radio" name="q17" value="3"> (3)</label>
+                <label><input type="radio" name="q17" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">18.</td>
+            <td class="question">Does your child have a good memory for where they put things at home?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q18" value="1"> (1)</label>
+                <label><input type="radio" name="q18" value="2"> (2)</label>
+                <label><input type="radio" name="q18" value="3"> (3)</label>
+                <label><input type="radio" name="q18" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">19.</td>
+            <td class="question">Can your child differentiate between shapes like triangles, rectangles, and circles?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q19" value="1"> (1)</label>
+                <label><input type="radio" name="q19" value="2"> (2)</label>
+                <label><input type="radio" name="q19" value="3"> (3)</label>
+                <label><input type="radio" name="q19" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">20.</td>
+            <td class="question">Can your child sort or match colors?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q20" value="1"> (1)</label>
+                <label><input type="radio" name="q20" value="2"> (2)</label>
+                <label><input type="radio" name="q20" value="3"> (3)</label>
+                <label><input type="radio" name="q20" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">21.</td>
+            <td class="question">Can your child name colors?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q21" value="1"> (1)</label>
+                <label><input type="radio" name="q21" value="2"> (2)</label>
+                <label><input type="radio" name="q21" value="3"> (3)</label>
+                <label><input type="radio" name="q21" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">22.</td>
+            <td class="question">Can your child find objects within a complex picture?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q22" value="1"> (1)</label>
+                <label><input type="radio" name="q22" value="2"> (2)</label>
+                <label><input type="radio" name="q22" value="3"> (3)</label>
+                <label><input type="radio" name="q22" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="sno">23.</td>
+            <td class="question">Does your child adapt well to new surroundings, navigating easily?</td>
+            <td class="answer">
+              <div class="answer-options">
+                <label><input type="radio" name="q23" value="1"> (1)</label>
+                <label><input type="radio" name="q23" value="2"> (2)</label>
+                <label><input type="radio" name="q23" value="3"> (3)</label>
+                <label><input type="radio" name="q23" value="4"> (4)</label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="actions">
+        <button type="reset" onclick="clearResult()">🗑️ Clear Answers</button>
+        <button type="button" onclick="window.print()">🖨️ Print</button>
+        <button type="submit">✔ Submit</button>
+      </div>
+
+      <div class="result-banner" id="resultBanner"></div>
+
+    </form>
+
+  </div>
+
+  <script>
+    const TOTAL = 23;
+
+    document.getElementById('pqcviForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      // Check all questions are answered
+      const unanswered = [];
+      for (let i = 1; i <= TOTAL; i++) {
+        if (!this.querySelector(`input[name="q${i}"]:checked`)) {
+          unanswered.push(i);
+        }
+      }
+
+      const banner = document.getElementById('resultBanner');
+
+      if (unanswered.length > 0) {
+        banner.className = 'result-banner error';
+        banner.textContent = `⚠ Please answer question${unanswered.length > 1 ? 's' : ''} ${unanswered.join(', ')} before submitting.`;
+        banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+
+      // Calculate total score
+      let total = 0;
+      for (let i = 1; i <= TOTAL; i++) {
+        total += parseInt(this.querySelector(`input[name="q${i}"]:checked`).value);
+      }
+
+      const max = TOTAL * 4;
+      banner.className = 'result-banner success';
+      banner.textContent = `✔ Form submitted successfully! Total score: ${total} / ${max}`;
+      banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    function clearResult() {
+      const banner = document.getElementById('resultBanner');
+      banner.className = 'result-banner';
+      banner.textContent = '';
+    }
+  </script>
+</body>
+</html>

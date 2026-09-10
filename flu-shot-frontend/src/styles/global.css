@@ -1061,6 +1061,48 @@ body {
     color: #888;
 }
 
+.login-examine-divider {
+    text-align: center;
+    margin: 18px 0 14px;
+    position: relative;
+}
+
+.login-examine-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e0e6ed;
+}
+
+.login-examine-divider span {
+    background: #fff;
+    padding: 0 12px;
+    font-size: 13px;
+    color: #aaa;
+    position: relative;
+}
+
+.login-examine-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 2px solid #1b2a4a;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1b2a4a;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.login-examine-btn:hover {
+    background: #1b2a4a;
+    color: #fff;
+}
+
 /* ===== PQCVI FORM ===== */
 .pqcvi-container {
     font-family: 'Inter', Arial, sans-serif;

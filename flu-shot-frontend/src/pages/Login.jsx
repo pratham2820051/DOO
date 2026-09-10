@@ -118,6 +118,18 @@ function Login({ onLogin }) {
             </svg>
             <span>Your data is encrypted and secure</span>
           </div>
+
+          <div className="login-examine-divider">
+            <span>or</span>
+          </div>
+
+          <button
+            type="button"
+            className="login-examine-btn"
+            onClick={() => navigate('/pqcvi-examine')}
+          >
+            🔍 Examine — PQCVI Questionnaire
+          </button>
         </form>
       </div>
     </div>

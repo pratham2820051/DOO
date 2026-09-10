@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
 import AddPatient from './pages/AddPatient';
 import PatientPrint from './pages/PatientPrint';
+import PQCVIExamine from './pages/PQCVIExamine';
+import Register from './pages/Register';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import './styles/global.css';
@@ -17,6 +19,8 @@ function App() {
     return (
       <Router>
         <Routes>
+          <Route path="/pqcvi-examine" element={<PQCVIExamine />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
         </Routes>
       </Router>

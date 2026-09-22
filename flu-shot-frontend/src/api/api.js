@@ -10,7 +10,7 @@ export const loginUser = async (username, password) => {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || 'Login failed');
-  return data; // { access_token, token_type }
+  return data;
 };
 
 export const registerUser = async (username, password) => {
@@ -66,5 +66,18 @@ export const deletePatient = async (id) => {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || 'Failed to delete patient');
+  return data;
+};
+
+// ===== PQCVI PUBLIC SUBMIT =====
+
+export const submitPQCVI = async (name, age, gender, answers) => {
+  const res = await fetch(`${BASE_URL}/api/pqcvi/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, age: parseFloat(age), gender, answers }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'Failed to submit PQCVI');
   return data;
 };

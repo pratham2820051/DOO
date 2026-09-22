@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { submitPQCVI } from '../../api/api';
 
 const QUESTIONS = [
   "Does your child recognize their mother's or father's face before you speak?",
@@ -40,11 +41,13 @@ function getAgeGroup(age) {
   return null;
 }
 
-function PQCVI({ onDataChange }) {
-  const [age, setAge] = useState('');
+function PQCVI({ onDataChange, userInfo }) {
+  const [age, setAge] = useState(userInfo?.age || '');
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState('');
 
   const handleAnswer = (q, val) => {
     const updated = { ...answers, [q]: parseInt(val) };
@@ -94,6 +97,16 @@ function PQCVI({ onDataChange }) {
     };
     setResult(res);
     if (onDataChange) onDataChange(JSON.stringify({ age, answers, result: res }));
+
+    // Save to DB if userInfo is provided (public examine flow)
+    if (userInfo?.name) {
+      setSaving(true);
+      setSavedMsg('');
+      submitPQCVI(userInfo.name, ageNum, userInfo.gender || '-', answers)
+        .then(() => setSavedMsg('✅ Results saved successfully!'))
+        .catch(() => setSavedMsg('⚠ Could not save to server.'))
+        .finally(() => setSaving(false));
+    }
   };
 
   const handleClear = () => {
@@ -140,8 +153,11 @@ function PQCVI({ onDataChange }) {
           value={age}
           onChange={handleAge}
           className="pqcvi-age-input"
+          readOnly={!!userInfo?.age}
         />
-        <span className="pqcvi-age-hint">Supported range: 3 – 6 years</span>
+        <span className="pqcvi-age-hint">
+          {userInfo?.name ? `${userInfo.name} | ${userInfo.gender}` : 'Supported range: 3 – 6 years'}
+        </span>
       </div>
 
       {/* Questions Table */}
@@ -191,8 +207,17 @@ function PQCVI({ onDataChange }) {
       {/* Actions */}
       <div className="pqcvi-actions">
         <button type="button" className="pqcvi-btn-clear" onClick={handleClear}>🗑️ Clear Answers</button>
-        <button type="button" className="pqcvi-btn-score" onClick={handleSubmitScore}>✔ Calculate Score</button>
+        <button type="button" className="pqcvi-btn-score" onClick={handleSubmitScore} disabled={saving}>
+          {saving ? 'Saving...' : '✔ Calculate Score'}
+        </button>
       </div>
+
+      {/* Save status */}
+      {savedMsg && (
+        <div style={{ padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', fontSize: '14px', background: savedMsg.startsWith('✅') ? '#f0fdf4' : '#fff3cd', color: savedMsg.startsWith('✅') ? '#15803d' : '#856404', border: `1px solid ${savedMsg.startsWith('✅') ? '#86efac' : '#ffc107'}` }}>
+          {savedMsg}
+        </div>
+      )}
 
       {/* Result */}
       {result && (

@@ -1,6 +1,11 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Dict
+from typing import Dict, Optional
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from ..database import get_db
+from ..models import Patient
+import json
 
 router = APIRouter(prefix="/api/pqcvi", tags=["PQCVI"])
 
@@ -27,7 +32,14 @@ STREAMS = [
 
 class PQCVIRequest(BaseModel):
     age: float
-    answers: Dict[str, int]  # {"q1": 1, "q2": 3, ...}
+    answers: Dict[str, int]
+
+
+class PQCVIPublicSubmit(BaseModel):
+    name: str
+    age: float
+    gender: str
+    answers: Dict[str, int]
 
 
 def get_age_group(age: float):
@@ -79,4 +91,65 @@ def calculate_score(data: PQCVIRequest):
         "overall_cutoff": overall_cutoff,
         "overall_result": overall_result,
         "streams": stream_results,
+    }
+
+
+@router.post("/submit")
+def submit_public_pqcvi(data: PQCVIPublicSubmit, db: Session = Depends(get_db)):
+    """Save public PQCVI examination results to the patients table."""
+    age_group = get_age_group(data.age)
+    if not age_group:
+        return {"error": "Age must be between 3 and 6 years."}
+
+    # Calculate scores
+    total_score = sum(data.answers.values())
+    average_score = round(total_score / TOTAL_QUESTIONS, 2)
+    overall_cutoff = OVERALL_CUTOFFS[age_group]
+    overall_result = "ISSUE DETECTED" if total_score >= overall_cutoff else "NO ISSUE"
+
+    stream_results = {}
+    for stream in STREAMS:
+        qs = stream["questions"]
+        s_total = sum(data.answers.get(f"q{q}", 0) for q in qs)
+        cutoff = stream["cutoffs"][age_group]
+        stream_results[stream["key"]] = {
+            "label": stream["label"],
+            "total": s_total,
+            "cutoff": cutoff,
+            "result": "ISSUE DETECTED" if s_total >= cutoff else "NO ISSUE",
+        }
+
+    pqcvi_payload = {
+        "name": data.name,
+        "age": data.age,
+        "gender": data.gender,
+        "age_group": age_group,
+        "answers": data.answers,
+        "total_score": total_score,
+        "max_score": MAX_SCORE,
+        "average_score": average_score,
+        "overall_cutoff": overall_cutoff,
+        "overall_result": overall_result,
+        "streams": stream_results,
+    }
+
+    # Save to patients table
+    new_patient = Patient(
+        name=data.name,
+        op_no="PQCVI-PUBLIC",
+        date=str(__import__('datetime').date.today()),
+        sex=data.gender,
+        age=str(data.age),
+        guardian_name="-",
+        address="-",
+        pqcvi_data=json.dumps(pqcvi_payload),
+    )
+    db.add(new_patient)
+    db.commit()
+    db.refresh(new_patient)
+
+    return {
+        "id": new_patient.id,
+        "message": "PQCVI submitted and saved successfully",
+        **pqcvi_payload,
     }

@@ -126,9 +126,9 @@ function Login({ onLogin }) {
           <button
             type="button"
             className="login-examine-btn"
-            onClick={() => navigate('/pqcvi-examine')}
+            onClick={() => navigate('/')}
           >
-            🔍 Examine — PQCVI Questionnaire
+            ← Back to Home
           </button>
         </form>
       </div>

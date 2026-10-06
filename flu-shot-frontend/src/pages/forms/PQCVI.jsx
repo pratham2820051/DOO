@@ -109,6 +109,135 @@ function PQCVI({ onDataChange, userInfo }) {
     }
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    const name = userInfo?.name || '-';
+    const gender = userInfo?.gender || '-';
+    const ageVal = age || '-';
+    const ageGroup = result?.age_group || '-';
+
+    const ANSWER_LABELS = { 1: 'Never', 2: 'Occasionally', 3: 'Most of the time', 4: 'Always' };
+
+    const questionsHTML = QUESTIONS.map((q, idx) => {
+      const qKey = `q${idx + 1}`;
+      const ans = answers[qKey];
+      const stream = VENTRAL_QS.includes(idx + 1) ? 'V' : 'D';
+      return `
+        <tr style="background:${idx % 2 === 0 ? '#f5f8ff' : '#fff'}">
+          <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;font-weight:600;color:#2563eb">${idx + 1}.</td>
+          <td style="border:1px solid #ccc;padding:6px 8px;font-size:13px">${q}</td>
+          <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;font-size:11px;color:#888">${stream}</td>
+          ${[1,2,3,4].map(v => `<td style="border:1px solid #ccc;padding:6px 8px;text-align:center">${ans === v ? '●' : '○'}</td>`).join('')}
+          <td style="border:1px solid #ccc;padding:6px 8px;font-size:13px;color:#374151">${ans ? ANSWER_LABELS[ans] : '-'}</td>
+        </tr>`;
+    }).join('');
+
+    const overallBg  = result?.overall_result  === 'ISSUE DETECTED' ? '#fee2e2' : '#dcfce7';
+    const overallClr = result?.overall_result  === 'ISSUE DETECTED' ? '#b91c1c' : '#15803d';
+    const vBg  = result?.ventral_result === 'ISSUE DETECTED' ? '#fee2e2' : '#dcfce7';
+    const vClr = result?.ventral_result === 'ISSUE DETECTED' ? '#b91c1c' : '#15803d';
+    const dBg  = result?.dorsal_result  === 'ISSUE DETECTED' ? '#fee2e2' : '#dcfce7';
+    const dClr = result?.dorsal_result  === 'ISSUE DETECTED' ? '#b91c1c' : '#15803d';
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>PQCVI Report — ${name}</title>
+  <meta charset="UTF-8"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 13px; color: #1a2340; background: #fff; padding: 20px; }
+    .no-print { display: flex; gap: 10px; margin-bottom: 16px; }
+    @media print { .no-print { display: none !important; } }
+    .header { background: linear-gradient(90deg,#1e40af,#2563eb); color:#fff; border-radius:8px; padding:16px 20px; margin-bottom:16px; }
+    .header h2 { font-size:17px; font-weight:700; margin-bottom:4px; }
+    .header p  { font-size:13px; opacity:.85; }
+    .info-row { display:flex; gap:20px; background:#f0f6ff; border:1px solid #dbeafe; border-radius:8px; padding:12px 16px; margin-bottom:16px; font-size:13px; }
+    .info-row span strong { color:#1e40af; }
+    table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+    thead tr { background:linear-gradient(90deg,#1e40af,#2563eb); color:#fff; }
+    thead th { padding:10px 8px; font-size:12px; font-weight:600; text-align:center; border:1px solid #1e40af; }
+    .result-section { border-radius:8px; padding:16px 20px; margin-bottom:16px; border:1.5px solid #ccc; }
+    .result-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px; }
+    .result-card { background:#fff; border:1px solid #e0e6ed; border-radius:8px; padding:12px; }
+    .result-card strong { font-size:12px; color:#1b2a4a; display:block; margin-bottom:6px; }
+    .big-score { font-size:24px; font-weight:700; color:#1e40af; }
+    .sub-text { font-size:11px; color:#666; margin-top:2px; }
+    .badge { display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; margin-top:6px; }
+    .footer { margin-top:24px; border-top:1px solid #e0e6ed; padding-top:12px; font-size:11px; color:#888; display:flex; justify-content:space-between; }
+    .print-btn { padding:10px 22px; background:#1e40af; color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; }
+    .back-btn  { padding:10px 22px; background:#e9ecef; color:#333; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="back-btn" onclick="window.close()">✕ Close</button>
+    <button class="print-btn" onclick="window.print()">🖨 Print / Save as PDF</button>
+  </div>
+
+  <div class="header">
+    <h2>👁️ Parental Questionnaire for Cerebral Visual Impairment (PQCVI)</h2>
+    <p>CVI Clinic Portal — Assessment Report</p>
+  </div>
+
+  <div class="info-row">
+    <span>👤 <strong>${name}</strong></span>
+    <span>Age: <strong>${ageVal} years</strong></span>
+    <span>Gender: <strong>${gender}</strong></span>
+    <span>Age Group: <strong>${ageGroup} years</strong></span>
+    <span>Date: <strong>${new Date().toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})}</strong></span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:5%">S.No</th>
+        <th style="width:52%;text-align:left">Question</th>
+        <th style="width:5%">Stream</th>
+        <th>Never</th>
+        <th>Occasionally</th>
+        <th>Most of the time</th>
+        <th>Always</th>
+        <th style="text-align:left">Answer</th>
+      </tr>
+    </thead>
+    <tbody>${questionsHTML}</tbody>
+  </table>
+
+  <div class="result-section" style="background:${result?.overall_result === 'ISSUE DETECTED' ? '#fff1f2' : '#f0fdf4'};border-color:${result?.overall_result === 'ISSUE DETECTED' ? '#fca5a5' : '#86efac'}">
+    <h3 style="font-size:15px;margin-bottom:4px;color:${overallClr}">Assessment Result — Age Group: ${ageGroup} years</h3>
+    <div class="result-grid">
+      <div class="result-card">
+        <strong>Overall Score</strong>
+        <span class="big-score">${result?.total_score} / ${result?.max_score}</span>
+        <span class="sub-text">Average: ${result?.average_score}</span>
+        <span class="sub-text">Cutoff: ${result?.overall_cutoff}</span>
+        <span class="badge" style="background:${overallBg};color:${overallClr}">${result?.overall_result}</span>
+      </div>
+      <div class="result-card">
+        <strong>Ventral-stream Function</strong>
+        <span class="big-score">${result?.ventral_total}</span>
+        <span class="sub-text">Cutoff: ${result?.ventral_cutoff}</span>
+        <span class="badge" style="background:${vBg};color:${vClr}">${result?.ventral_result}</span>
+      </div>
+      <div class="result-card">
+        <strong>Dorsal-stream Function</strong>
+        <span class="big-score">${result?.dorsal_total}</span>
+        <span class="sub-text">Cutoff: ${result?.dorsal_cutoff}</span>
+        <span class="badge" style="background:${dBg};color:${dClr}">${result?.dorsal_result}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>V = Ventral-stream questions &nbsp;|&nbsp; D = Dorsal-stream questions</span>
+    <span>Generated on ${new Date().toLocaleString('en-IN')}</span>
+  </div>
+</body>
+</html>`);
+    printWindow.document.close();
+  };
+
   const handleClear = () => {
     setAnswers({});
     setAge('');
@@ -210,6 +339,11 @@ function PQCVI({ onDataChange, userInfo }) {
         <button type="button" className="pqcvi-btn-score" onClick={handleSubmitScore} disabled={saving}>
           {saving ? 'Saving...' : '✔ Calculate Score'}
         </button>
+        {result && (
+          <button type="button" className="pqcvi-btn-print" onClick={handlePrint}>
+            🖨️ Print Report
+          </button>
+        )}
       </div>
 
       {/* Save status */}

@@ -1291,7 +1291,24 @@ body {
     transition: opacity 0.2s;
 }
 
-.pqcvi-btn-score:hover { opacity: 0.9; }
+.pqcvi-btn-print {
+    padding: 10px 24px;
+    background: #fff;
+    color: #1e40af;
+    border: 1.5px solid #2563eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.pqcvi-btn-print:hover {
+    background: #1e40af;
+    color: #fff;
+}
+
+
 
 .pqcvi-result {
     border-radius: 10px;

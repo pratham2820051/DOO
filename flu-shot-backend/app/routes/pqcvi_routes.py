@@ -2,7 +2,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Dict, Optional
 from sqlalchemy.orm import Session
-from fastapi import Depends
+from fastapi import Depends, HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 from ..database import get_db
 from ..models import Patient
 import json
@@ -134,19 +135,23 @@ def submit_public_pqcvi(data: PQCVIPublicSubmit, db: Session = Depends(get_db)):
     }
 
     # Save to patients table
-    new_patient = Patient(
-        name=data.name,
-        op_no="PQCVI-PUBLIC",
-        date=str(__import__('datetime').date.today()),
-        sex=data.gender,
-        age=str(data.age),
-        guardian_name="-",
-        address="-",
-        pqcvi_data=json.dumps(pqcvi_payload),
-    )
-    db.add(new_patient)
-    db.commit()
-    db.refresh(new_patient)
+    try:
+        new_patient = Patient(
+            name=data.name,
+            op_no="PQCVI-PUBLIC",
+            date=str(__import__('datetime').date.today()),
+            sex=data.gender,
+            age=str(data.age),
+            guardian_name="-",
+            address="-",
+            pqcvi_data=json.dumps(pqcvi_payload),
+        )
+        db.add(new_patient)
+        db.commit()
+        db.refresh(new_patient)
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     return {
         "id": new_patient.id,

@@ -62,6 +62,7 @@ class PatientCreate(BaseModel):
     # Family History
     consanguinity: Optional[str] = None
     nutritional_status: Optional[str] = None
+    cns: Optional[str] = None
     auditory_anomaly: Optional[str] = None
 
     # Ocular Examination

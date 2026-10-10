@@ -1,5 +1,27 @@
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
+// Check if JWT token is expired
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};
+
+// Call this before any authenticated request
+const getValidToken = () => {
+  const token = localStorage.getItem('token');
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    window.location.href = '/login';
+    return null;
+  }
+  return token;
+};
+
 // ===== AUTH =====
 
 export const loginUser = async (username, password) => {
@@ -27,13 +49,11 @@ export const registerUser = async (username, password) => {
 // ===== PATIENTS =====
 
 export const createPatient = async (patientData) => {
-  const token = localStorage.getItem('token');
+  const token = getValidToken();
+  if (!token) return;
   const res = await fetch(`${BASE_URL}/api/patients/`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(patientData),
   });
   const data = await res.json();
@@ -41,13 +61,38 @@ export const createPatient = async (patientData) => {
   return data;
 };
 
+export const updatePatient = async (id, patientData) => {
+  const token = getValidToken();
+  if (!token) return;
+  const res = await fetch(`${BASE_URL}/api/patients/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(patientData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'Failed to update patient');
+  return data;
+};
+
 export const getAllPatients = async () => {
-  const token = localStorage.getItem('token');
+  const token = getValidToken();
+  if (!token) return [];
   const res = await fetch(`${BASE_URL}/api/patients/`, {
-    headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+    headers: { Authorization: `Bearer ${token}` },
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || 'Failed to fetch patients');
+  return data;
+};
+
+export const getPatient = async (id) => {
+  const token = getValidToken();
+  if (!token) return null;
+  const res = await fetch(`${BASE_URL}/api/patients/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'Failed to fetch patient');
   return data;
 };
 
@@ -59,10 +104,11 @@ export const getPatientCount = async () => {
 };
 
 export const deletePatient = async (id) => {
-  const token = localStorage.getItem('token');
+  const token = getValidToken();
+  if (!token) return;
   const res = await fetch(`${BASE_URL}/api/patients/${id}`, {
     method: 'DELETE',
-    headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+    headers: { Authorization: `Bearer ${token}` },
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || 'Failed to delete patient');

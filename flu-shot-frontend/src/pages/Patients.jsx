@@ -90,6 +90,12 @@ function Patients() {
                   <td>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                       <Link
+                        to={`/patient/${p.id}/edit`}
+                        style={{ padding: '5px 12px', background: '#1e40af', color: '#fff', borderRadius: '4px', fontSize: '13px', textDecoration: 'none' }}
+                      >
+                        ✏️ Edit
+                      </Link>
+                      <Link
                         to={`/patient/${p.id}/print`}
                         style={{ padding: '5px 12px', background: '#1b2a4a', color: '#fff', borderRadius: '4px', fontSize: '13px', textDecoration: 'none' }}
                       >

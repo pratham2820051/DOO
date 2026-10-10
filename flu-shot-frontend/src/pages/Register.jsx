@@ -28,7 +28,7 @@ function Register() {
     try {
       await registerUser(username, password);
       setSuccess(true);
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       setError(err.message || 'Registration failed');
     } finally {

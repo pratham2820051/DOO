@@ -61,6 +61,7 @@ class Patient(Base):
     # Family History
     consanguinity = Column(String(5))
     nutritional_status = Column(Text)
+    cns = Column(String(100))
     auditory_anomaly = Column(String(5))
 
     # Ocular Examination

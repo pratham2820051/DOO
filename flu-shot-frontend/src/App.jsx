@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Patients from './pages/Patients';
 import AddPatient from './pages/AddPatient';
+import EditPatient from './pages/EditPatient';
 import PatientPrint from './pages/PatientPrint';
 import PQCVIExamine from './pages/PQCVIExamine';
 import Register from './pages/Register';
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/patients" element={<Patients />} />
                 <Route path="/add-patient" element={<AddPatient />} />
+                <Route path="/patient/:id/edit" element={<EditPatient />} />
                 <Route path="/patient/:id/print" element={<PatientPrint />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>

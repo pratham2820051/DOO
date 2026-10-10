@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import DrawingCanvas from '../../components/DrawingCanvas';
 
-function BasicInfo({ onDataChange }) {
-  const [formData, setFormData] = useState({
+function BasicInfo({ onDataChange, initialData }) {
+  const [formData, setFormData] = useState(initialData || {
     name: '', op_no: '', date: '', sex: '', age: '', guardian_name: '', address: '',
     colour_perception: '', moving_objects: '', longer_time: '', gaze_preference: '',
     looks_through: '', attention_span: '', squint: '', seizures: '', stumbling: '',
@@ -33,9 +33,18 @@ function BasicInfo({ onDataChange }) {
   };
 
   const Radio = ({ name, value, label }) => (
-    <label style={{ marginRight: '8px', fontSize: '14px' }}>
+    <label style={{ marginRight: '8px', fontSize: '14px', cursor: 'pointer' }}>
       <input type="radio" name={name} value={value}
-        checked={formData[name] === value} onChange={handleChange} /> {label}
+        checked={formData[name] === value}
+        onChange={handleChange}
+        onClick={() => {
+          if (formData[name] === value) {
+            const updated = { ...formData, [name]: '' };
+            setFormData(updated);
+            if (onDataChange) onDataChange(updated);
+          }
+        }}
+      /> {label}
     </label>
   );
 
@@ -203,7 +212,7 @@ function BasicInfo({ onDataChange }) {
           <strong>Nutritional status:</strong>
           <textarea name="nutritional_status" value={formData.nutritional_status} onChange={handleChange} rows="3" style={{ width: '100%', border: '1px solid #999', fontSize: '14px', padding: '4px', resize: 'vertical' }}></textarea>
 
-          <h4>CNS: &nbsp; CP / GDD / AUTISM / ________</h4>
+          <h4>CNS: &nbsp; CP / GDD / AUTISM / <input type="text" name="cns" value={formData.cns || ''} onChange={handleChange} style={{ border: 'none', borderBottom: '1px solid #000', width: '140px', fontSize: '14px', padding: '2px 4px', outline: 'none' }} placeholder="type here..." /></h4>
 
           <strong>Auditory anomaly:</strong>
           <Radio name="auditory_anomaly" value="0" label="absent(0)" /><Radio name="auditory_anomaly" value="1" label="present(1)" />

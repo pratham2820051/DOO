@@ -284,7 +284,8 @@ function PatientPrint() {
               }
               <br />
               <strong>Consanguinity:</strong> {patient.consanguinity === '0' ? 'absent' : patient.consanguinity === '1' ? 'present' : '-'}<br />
-              <strong>Nutritional status:</strong> {patient.nutritional_status || '-'}<br /><br />
+              <strong>Nutritional status:</strong> {patient.nutritional_status || '-'}<br />
+              <strong>CNS:</strong> CP / GDD / AUTISM / {patient.cns || '-'}<br /><br />
               <strong>Auditory anomaly:</strong> {patient.auditory_anomaly === '0' ? 'absent' : patient.auditory_anomaly === '1' ? 'present' : '-'}
 
               <h4 style={h4}>Ocular Examination:</h4>

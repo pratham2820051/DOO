@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const BASE_URL = 'https://doo-kxpn.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 function PatientPrint() {
   const { id } = useParams();
@@ -26,6 +26,152 @@ function PatientPrint() {
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center' }}>Loading...</div>;
   if (!patient) return <div style={{ padding: '40px' }}>Patient not found. <button onClick={() => navigate('/patients')}>Back</button></div>;
+
+  // PQCVI-PUBLIC patients: show PQCVI report only
+  if (patient.op_no === 'PQCVI-PUBLIC') {
+    const pq = parse(patient.pqcvi_data);
+    if (!pq) return <div style={{ padding: '40px' }}>No PQCVI data found.</div>;
+
+    const QUESTIONS = [
+      "Does your child recognize their mother's or father's face before you speak?",
+      "Can your child reach out and grasp objects?",
+      "Is your child able to track slow-moving objects, such as a rolling ball?",
+      "Does your child recognize the faces of other family members?",
+      "Can your child identify familiar objects like a cup, shoes, or a doll?",
+      "Can your child locate objects hidden under a blanket or paper?",
+      "Is your child able to pick up a small object with their thumb and index finger?",
+      "Can your child track fast-moving objects, such as a moving car?",
+      "Does your child eat food from different parts of a large plate rather than just one area?",
+      "Can your child recognize other people in photographs?",
+      "Can your child recognize themselves in photographs?",
+      "Can your child navigate well around their home, finding rooms and the toilet easily?",
+      "Does your child recognize their friends' faces?",
+      "Can your child easily locate doorways and navigate along corridors?",
+      "Can your child judge the height of steps without tripping?",
+      "Can your child identify objects while they are moving quickly themselves?",
+      "Can your child find objects on a blanket with a complex pattern?",
+      "Does your child have a good memory for where they put things at home?",
+      "Can your child differentiate between shapes like triangles, rectangles, and circles?",
+      "Can your child sort or match colors?",
+      "Can your child name colors?",
+      "Can your child find objects within a complex picture?",
+      "Does your child adapt well to new surroundings, navigating easily?",
+    ];
+    const VENTRAL_QS = [1,4,5,10,11,13,19,20,21];
+    const ANSWER_LABELS = { 1: 'Never', 2: 'Occasionally', 3: 'Most of the time', 4: 'Always' };
+    const answers = pq.answers || {};
+
+    const overallIssue = pq.overall_result === 'ISSUE DETECTED';
+    const vIssue = pq.streams?.ventral?.result === 'ISSUE DETECTED';
+    const dIssue = pq.streams?.dorsal?.result === 'ISSUE DETECTED';
+
+    return (
+      <>
+        <div className="print-actions no-print">
+          <button onClick={() => navigate('/patients')} className="topbar-btn" style={{ background: '#555' }}>← Back</button>
+          <button onClick={handlePrint} className="action-btn-large" style={{ padding: '10px 24px' }}>
+            🖨 Print / Save as PDF
+          </button>
+        </div>
+
+        <div ref={printRef} className="print-area">
+          <div className="print-page">
+            {/* Header */}
+            <div style={{ background: 'linear-gradient(90deg,#1e40af,#2563eb)', color: '#fff', borderRadius: '8px', padding: '16px 20px', marginBottom: '16px' }}>
+              <h2 style={{ margin: '0 0 4px', fontSize: '17px', fontWeight: 700 }}>👁️ Parental Questionnaire for Cerebral Visual Impairment (PQCVI)</h2>
+              <p style={{ margin: 0, fontSize: '13px', opacity: 0.85 }}>CVI Clinic Portal — Assessment Report</p>
+            </div>
+
+            {/* Patient info */}
+            <div style={{ display: 'flex', gap: '20px', background: '#f0f6ff', border: '1px solid #dbeafe', borderRadius: '8px', padding: '12px 16px', marginBottom: '16px', fontSize: '13px', flexWrap: 'wrap' }}>
+              <span>👤 <strong>{pq.name}</strong></span>
+              <span>Age: <strong>{pq.age} years</strong></span>
+              <span>Gender: <strong>{pq.gender}</strong></span>
+              <span>Age Group: <strong>{pq.age_group} years</strong></span>
+              <span>Date: <strong>{patient.date}</strong></span>
+            </div>
+
+            {/* Questions table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px', fontSize: '13px' }}>
+              <thead>
+                <tr style={{ background: 'linear-gradient(90deg,#1e40af,#2563eb)', color: '#fff' }}>
+                  <th style={th}>S.No</th>
+                  <th style={{ ...th, textAlign: 'left', width: '52%' }}>Question</th>
+                  <th style={th}>Stream</th>
+                  <th style={th}>Never</th>
+                  <th style={th}>Occasionally</th>
+                  <th style={th}>Most of the time</th>
+                  <th style={th}>Always</th>
+                  <th style={{ ...th, textAlign: 'left' }}>Answer</th>
+                </tr>
+              </thead>
+              <tbody>
+                {QUESTIONS.map((q, idx) => {
+                  const qKey = `q${idx + 1}`;
+                  const ans = answers[qKey];
+                  const stream = VENTRAL_QS.includes(idx + 1) ? 'V' : 'D';
+                  return (
+                    <tr key={qKey} style={{ background: idx % 2 === 0 ? '#f5f8ff' : '#fff' }}>
+                      <td style={{ ...td, textAlign: 'center', fontWeight: 600, color: '#2563eb' }}>{idx + 1}.</td>
+                      <td style={td}>{q}</td>
+                      <td style={{ ...td, textAlign: 'center', fontSize: '11px', color: '#888' }}>{stream}</td>
+                      {[1,2,3,4].map(v => (
+                        <td key={v} style={{ ...td, textAlign: 'center' }}>{ans === v ? '●' : '○'}</td>
+                      ))}
+                      <td style={{ ...td, color: '#374151' }}>{ans ? ANSWER_LABELS[ans] : '-'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* Results */}
+            <div style={{ borderRadius: '8px', padding: '16px 20px', border: `1.5px solid ${overallIssue ? '#fca5a5' : '#86efac'}`, background: overallIssue ? '#fff1f2' : '#f0fdf4' }}>
+              <h3 style={{ margin: '0 0 14px', fontSize: '15px', color: overallIssue ? '#b91c1c' : '#15803d' }}>
+                Assessment Result — Age Group: {pq.age_group} years
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px' }}>
+                {[
+                  { label: 'Overall Score', score: `${pq.total_score} / ${pq.max_score}`, sub: `Average: ${pq.average_score}`, cutoff: `Cutoff: ${pq.overall_cutoff}`, result: pq.overall_result, issue: overallIssue },
+                  { label: 'Ventral-stream Function', score: pq.streams?.ventral?.total, sub: null, cutoff: `Cutoff: ${pq.streams?.ventral?.cutoff}`, result: pq.streams?.ventral?.result, issue: vIssue },
+                  { label: 'Dorsal-stream Function',  score: pq.streams?.dorsal?.total,  sub: null, cutoff: `Cutoff: ${pq.streams?.dorsal?.cutoff}`,  result: pq.streams?.dorsal?.result,  issue: dIssue },
+                ].map(card => (
+                  <div key={card.label} style={{ background: '#fff', border: '1px solid #e0e6ed', borderRadius: '8px', padding: '12px' }}>
+                    <strong style={{ fontSize: '12px', color: '#1b2a4a', display: 'block', marginBottom: '6px' }}>{card.label}</strong>
+                    <span style={{ fontSize: '24px', fontWeight: 700, color: '#1e40af' }}>{card.score}</span>
+                    {card.sub && <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{card.sub}</div>}
+                    <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{card.cutoff}</div>
+                    <span style={{ display: 'inline-block', padding: '4px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 700, marginTop: '6px', background: card.issue ? '#fee2e2' : '#dcfce7', color: card.issue ? '#b91c1c' : '#15803d' }}>
+                      {card.result}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '20px', borderTop: '1px solid #e0e6ed', paddingTop: '10px', fontSize: '11px', color: '#888', display: 'flex', justifyContent: 'space-between' }}>
+              <span>V = Ventral-stream questions &nbsp;|&nbsp; D = Dorsal-stream questions</span>
+              <span>Department of Ophthalmology — CVI Clinic</span>
+            </div>
+          </div>
+        </div>
+
+        <style>{`
+          @media print {
+            .no-print { display: none !important; }
+            .sidebar, .topbar { display: none !important; }
+            .app-main { margin-left: 0 !important; }
+            .app-content { padding: 0 !important; }
+            .print-page { page-break-after: always; padding: 15px; }
+            body { background: white !important; }
+          }
+          .print-actions { display: flex; gap: 12px; align-items: center; padding: 15px 20px; background: #f0f2f5; margin-bottom: 20px; }
+          .print-area { background: white; padding: 10px; }
+          .print-page { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; font-family: Arial, sans-serif; }
+        `}</style>
+      </>
+    );
+  }
 
   const va = parse(patient.visual_acuity_data);
   const screening = parse(patient.cvi_screening_data);

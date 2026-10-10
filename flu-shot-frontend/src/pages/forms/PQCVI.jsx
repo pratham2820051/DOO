@@ -104,7 +104,7 @@ function PQCVI({ onDataChange, userInfo }) {
       setSavedMsg('');
       submitPQCVI(userInfo.name, ageNum, userInfo.gender || '-', answers)
         .then(() => setSavedMsg('✅ Results saved successfully!'))
-        .catch(() => setSavedMsg('⚠ Could not save to server.'))
+        .catch((err) => setSavedMsg('⚠ Could not save to server: ' + err.message))
         .finally(() => setSaving(false));
     }
   };

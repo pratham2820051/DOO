@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routes import auth_routes, patient_routes, pqcvi_routes
+from .routes import auth_routes, patient_routes, pqcvi_routes, ocr_routes
 
 # Create all tables
 Base.metadata.create_all(bind=engine)
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(auth_routes.router)
 app.include_router(patient_routes.router)
 app.include_router(pqcvi_routes.router)
+app.include_router(ocr_routes.router)
 
 
 @app.get("/")

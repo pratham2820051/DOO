@@ -127,3 +127,20 @@ export const submitPQCVI = async (name, age, gender, answers) => {
   if (!res.ok) throw new Error(data.detail || 'Failed to submit PQCVI');
   return data;
 };
+
+// ===== OCR PDF UPLOAD =====
+
+export const extractPatientFromPDF = async (file) => {
+  const token = getValidToken();
+  if (!token) return;
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${BASE_URL}/api/ocr/extract`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || 'OCR extraction failed');
+  return data;
+};

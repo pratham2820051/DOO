@@ -68,7 +68,18 @@ def pdf_to_images_bytes(pdf_bytes: bytes) -> list[bytes]:
     """Convert PDF bytes to list of PNG image bytes."""
     try:
         from pdf2image import convert_from_bytes
-        images = convert_from_bytes(pdf_bytes, dpi=200, fmt='PNG')
+        
+        # Windows poppler path - adjust if installed elsewhere
+        poppler_path = r"C:\poppler\poppler-24.08.0\Library\bin"
+        if not os.path.exists(poppler_path):
+            poppler_path = None  # Let pdf2image search in PATH
+        
+        images = convert_from_bytes(
+            pdf_bytes, 
+            dpi=200, 
+            fmt='PNG',
+            poppler_path=poppler_path
+        )
         result = []
         for img in images:
             buf = io.BytesIO()

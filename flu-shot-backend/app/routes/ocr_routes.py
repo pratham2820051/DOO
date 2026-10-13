@@ -41,55 +41,79 @@ def parse_patient_data(text: str) -> dict:
         match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
         return match.group(1).strip() if match else default
     
-    # Extract name (look for "Name:" followed by text)
-    name = find(r'Name[:\s]+([A-Za-z\s\.]+?)(?:\s+OP|Gender|$)', "")
-    if not name:
-        name = find(r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)', "")
+    # Clean up text - remove extra spaces
+    text = re.sub(r'\s+', ' ', text)
     
-    # Extract OP number
-    op_no = find(r'OP\s*[Nn]umber[:\s]+([A-Z0-9\-/]+)', "")
+    # Extract name - look for pattern "Name * <text>"
+    name = find(r'Name\s*[*:]\s*([A-Za-z\s]+?)(?:\s+OP|Gender|Sex|\d|$)', "")
+    if not name or len(name) < 2:
+        # Try alternative: first capitalized word after "Name"
+        name = find(r'Name[^A-Z]*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', "")
+    
+    # Extract OP number - various formats
+    op_no = find(r'OP\s*[Nn]o?\s*[*:]\s*([A-Z0-9/\-]+)', "")
     if not op_no:
-        op_no = find(r'OP[:\s]+([A-Z0-9\-/]+)', "")
+        op_no = find(r'OP[:\s]+([A-Z0-9/\-]+)', "")
     
-    # Extract date (various formats)
-    date = find(r'Date[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})', "")
+    # Extract date - multiple formats
+    date = find(r'Date\s*[*:]\s*(\d{1,2}[-/]\s*[A-Za-z]{3,}[-/]\s*\d{2,4})', "")
+    if not date:
+        date = find(r'Date\s*[*:]\s*(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})', "")
     
-    # Extract age
-    age = find(r'Age[:\s]+(\d+)', "")
+    # Extract age - look for digits near "Age"
+    age = find(r'Age\s*[*:]\s*(\d+)', "")
     if not age:
-        age = find(r'(\d+)\s*(?:yrs|years|y|months|m)', "")
+        age = find(r'(\d+)\s*(?:yrs|years|y|months|m)\b', "")
     
-    # Extract gender/sex
+    # Extract gender/sex - multiple patterns
     sex = ""
-    if re.search(r'\bMale\b', text, re.IGNORECASE):
+    # Check for explicit Male/Female
+    if re.search(r'\bMale\b', text, re.IGNORECASE) and not re.search(r'\bFemale\b', text, re.IGNORECASE):
         sex = "Male"
     elif re.search(r'\bFemale\b', text, re.IGNORECASE):
         sex = "Female"
-    elif re.search(r'\bM\b', text):
+    # Check for M/F with boundaries
+    elif re.search(r'Sex\s*[*:]\s*M\b', text):
         sex = "Male"
-    elif re.search(r'\bF\b', text):
+    elif re.search(r'Sex\s*[*:]\s*F\b', text):
         sex = "Female"
     
     # Extract guardian/parent name
-    guardian = find(r'(?:Guardian|Parent|Father|Mother)[:\s]+([A-Za-z\s\.]+?)(?:\n|Address|$)', "")
+    guardian = find(r"(?:Parent|Guardian|Father|Mother)(?:'s)?\s*(?:/\s*Guardian(?:'s)?)?\s*name\s*[*:]\s*([A-Za-z\s]+?)(?:\s+Address|$)", "")
+    if not guardian:
+        guardian = find(r"Guardian\s*[*:]\s*([A-Za-z\s]+?)(?:\n|Address|$)", "")
     
     # Extract address
-    address = find(r'Address[:\s]+(.+?)(?:\n\n|Chief|$)', "")
+    address = find(r'Address\s*[*:]\s*([A-Za-z0-9\s,.-]+?)(?:\n\n|Chief|Family|$)', "")
     
     # Extract birth weight
-    birth_weight = find(r'Birth\s*[Ww]eight[:\s]+(\d+)', "")
+    birth_weight = find(r'Birth\s*[Ww]eight\s*[*:]?\s*(\d+)', "")
     
     # Extract gestation weeks
-    gestation_weeks = find(r'(?:Gestation|Weeks)[:\s]+(\d+)', "")
+    gestation_weeks = find(r'(?:Gestation|Weeks)\s*[*:]?\s*(\d+)', "")
     
-    # Check for various conditions in Chief Complaints
+    # Check for various conditions - look for Yes(1) or checked boxes
+    def check_yes(keyword):
+        # Look for pattern like "keyword ... Yes(1)" or "keyword ... No(0)"
+        if re.search(rf'{keyword}.*?Yes\s*\(1\)', text, re.IGNORECASE):
+            return "1"
+        elif re.search(rf'{keyword}.*?No\s*\(0\)', text, re.IGNORECASE):
+            return "0"
+        return ""
+    
     chief_complaints = {
-        "colour_perception": "1" if re.search(r'(?:Colour|Color)\s*perception.*?Yes', text, re.IGNORECASE) else "0",
-        "moving_objects": "1" if re.search(r'moving\s*objects.*?Yes', text, re.IGNORECASE) else "0",
-        "longer_time": "1" if re.search(r'Longer\s*time.*?Yes', text, re.IGNORECASE) else "0",
-        "gaze_preference": "1" if re.search(r'Gaze\s*preference.*?Yes', text, re.IGNORECASE) else "0",
-        "squint": "1" if re.search(r'Squint.*?Yes', text, re.IGNORECASE) else "0",
+        "colour_perception": check_yes(r'Colour\s*perception'),
+        "moving_objects": check_yes(r'moving\s*objects'),
+        "longer_time": check_yes(r'Longer\s*time'),
+        "gaze_preference": check_yes(r'Gaze\s*preference'),
+        "looks_through": check_yes(r'Looks\s*through'),
+        "squint": check_yes(r'Squint'),
+        "seizures": check_yes(r'Seizures'),
+        "stumbling": check_yes(r'Stumbling'),
     }
+    
+    # Extract CNS field
+    cns = find(r'(?:CNS|CP|GDD|AUTISM)[:\s/]+([A-Za-z\s/]+?)(?:\n|Birth|$)', "")
     
     return {
         "name": name,
@@ -102,11 +126,9 @@ def parse_patient_data(text: str) -> dict:
         **chief_complaints,
         "gestation_weeks": gestation_weeks,
         "birth_weight": birth_weight,
+        "cns": cns,
         # Initialize remaining fields as empty
-        "looks_through": "",
         "attention_span": "",
-        "seizures": "",
-        "stumbling": "",
         "favourite_things": "",
         "difficulty_new": "",
         "fever_rashes": "",
@@ -123,7 +145,6 @@ def parse_patient_data(text: str) -> dict:
         "milestones": "",
         "consanguinity": "",
         "nutritional_status": "",
-        "cns": "",
         "auditory_anomaly": "",
         "eom": "",
         "visual_axes": "",

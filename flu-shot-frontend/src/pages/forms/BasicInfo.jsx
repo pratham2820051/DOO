@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DrawingCanvas from '../../components/DrawingCanvas';
 
 function BasicInfo({ onDataChange, initialData }) {
@@ -17,6 +17,13 @@ function BasicInfo({ onDataChange, initialData }) {
     pedigree_image: '',
   });
   const [errors, setErrors] = useState({});
+
+  // Update formData when initialData changes (OCR extraction)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({ ...prev, ...initialData }));
+    }
+  }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

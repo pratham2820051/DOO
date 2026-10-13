@@ -137,47 +137,8 @@ function AddPatient() {
   };
 
   return (
-    <div className="add-patient-page" style={{ display: 'flex', gap: '20px' }}>
+    <div className="add-patient-page">
       <style>{successAnim}</style>
-
-      {/* ===== PDF VIEWER SIDEBAR ===== */}
-      {pdfUrl && (
-        <div style={{
-          width: showPdf ? '45%' : '0',
-          transition: 'width 0.3s ease',
-          overflow: 'hidden',
-          borderRight: showPdf ? '2px solid #e5e7eb' : 'none',
-          paddingRight: showPdf ? '20px' : '0',
-        }}>
-          <div style={{ position: 'sticky', top: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', color: '#1b2a4a' }}>📄 {pdfName}</h3>
-              <button
-                onClick={() => setShowPdf(!showPdf)}
-                style={{
-                  background: '#f3f4f6', border: 'none', padding: '6px 12px',
-                  borderRadius: '6px', fontSize: '13px', cursor: 'pointer', fontWeight: 600,
-                }}
-              >
-                {showPdf ? '← Hide' : 'Show PDF'}
-              </button>
-            </div>
-            <div style={{
-              border: '2px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden',
-              background: '#f9fafb', height: 'calc(100vh - 140px)',
-            }}>
-              <iframe
-                src={pdfUrl}
-                style={{ width: '100%', height: '100%', border: 'none' }}
-                title="Patient Form PDF"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===== MAIN FORM AREA ===== */}
-      <div style={{ flex: 1 }}>
       <style>{successAnim}</style>
 
       {/* ===== SUCCESS OVERLAY ===== */}
@@ -289,7 +250,6 @@ function AddPatient() {
           </button>
         </div>
       )}
-      </div> {/* Close main form area */}
     </div>
   );
 }

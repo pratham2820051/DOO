@@ -122,7 +122,7 @@ async def extract_patient_from_pdf(file: UploadFile = File(...)):
             parts.append(types.Part.from_bytes(data=img_bytes, mime_type="image/png"))
 
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.8-flash",
             contents=parts,
         )
 

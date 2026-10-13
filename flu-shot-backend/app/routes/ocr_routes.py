@@ -174,26 +174,16 @@ def parse_patient_data(text: str) -> dict:
     ]
     gestation_weeks = find_multi(gestation_patterns, "")
     
-    # Check CHECKBOXES - look for Yes(1) or No(0) patterns
-    def check_field(keywords):
-        for keyword in keywords:
-            # Look for "keyword ... Yes(1)" pattern
-            if re.search(rf'{keyword}.*?Yes\s*\(\s*1\s*\)', text, re.IGNORECASE):
-                return "1"
-            # Look for checked boxes near keyword
-            if re.search(rf'{keyword}.*?(?:\[x\]|\[X\]|☑|✓)', text, re.IGNORECASE):
-                return "1"
-        # Look for explicit No(0)
-        for keyword in keywords:
-            if re.search(rf'{keyword}.*?No\s*\(\s*0\s*\)', text, re.IGNORECASE):
-                return "0"
-        return ""
-    
     # Extract CNS field
     cns_patterns = [
-        r'(?:CNS|CP|GDD|AUTISM)[:\s/]+([A-Za-z\s/]+?)(?:\n|Birth|$)',
+        r'CNS[:\s]+([A-Za-z\s/]+?)(?:\n|Auditory|Ocular|$)',
     ]
     cns = find_multi(cns_patterns, "")
+    
+    # NOTE: Checkbox detection disabled
+    # The PDF format shows "No(0) Yes(1)" for each field with one circled
+    # OCR cannot reliably detect which option is circled/checked
+    # User must manually select checkboxes
     
     return {
         "name": name,
@@ -203,14 +193,18 @@ def parse_patient_data(text: str) -> dict:
         "age": age,
         "guardian_name": guardian,
         "address": address,
-        "colour_perception": check_field(['Colour perception', 'Color perception']),
-        "moving_objects": check_field(['moving objects', 'Better vision with moving']),
-        "longer_time": check_field(['Longer time', 'time to find']),
-        "gaze_preference": check_field(['Gaze preference', 'light gazing']),
-        "looks_through": check_field(['Looks through people']),
-        "squint": check_field(['Squint']),
-        "seizures": check_field(['Seizures']),
-        "stumbling": check_field(['Stumbling']),
+        # Checkboxes left empty - cannot reliably detect from "No(0) Yes(1)" format
+        "colour_perception": "",
+        "moving_objects": "",
+        "longer_time": "",
+        "gaze_preference": "",
+        "looks_through": "",
+        "squint": "",
+        "seizures": "",
+        "stumbling": "",
+        "attention_span": "",
+        "favourite_things": "",
+        "difficulty_new": "",
         "gestation_weeks": gestation_weeks,
         "birth_weight": birth_weight,
         "cns": cns,

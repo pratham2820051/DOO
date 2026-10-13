@@ -5,6 +5,8 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from dotenv import load_dotenv
 from PIL import Image
 import pytesseract
+import cv2
+import numpy as np
 
 load_dotenv()
 
@@ -23,97 +25,175 @@ for path in TESSERACT_PATHS:
 
 
 def extract_text_from_image(image: Image.Image) -> str:
-    """Extract text from image using Tesseract OCR."""
+    """Extract text from image using Tesseract OCR with preprocessing."""
     try:
-        # Try Tesseract OCR
-        text = pytesseract.image_to_string(image, lang='eng', config='--psm 6')
-        return text
+        import cv2
+        import numpy as np
+        
+        # Convert PIL to OpenCV
+        img = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        
+        # Resize for better OCR (if too small)
+        height, width = img.shape[:2]
+        if width < 2000:
+            scale = 2000 / width
+            img = cv2.resize(img, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+        
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # Apply bilateral filter to reduce noise while keeping edges sharp
+        gray = cv2.bilateralFilter(gray, 9, 75, 75)
+        
+        # Apply adaptive thresholding
+        thresh = cv2.adaptiveThreshold(
+            gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+        )
+        
+        # Morphological operations to clean up
+        kernel = np.ones((1, 1), np.uint8)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+        
+        # Try multiple OCR configs for better accuracy
+        configs = [
+            '--psm 6 --oem 3',  # Assume uniform block of text, LSTM engine
+            '--psm 4 --oem 3',  # Assume single column of text
+            '--psm 3 --oem 3',  # Fully automatic page segmentation
+        ]
+        
+        best_text = ""
+        max_length = 0
+        
+        for config in configs:
+            try:
+                text = pytesseract.image_to_string(thresh, lang='eng', config=config)
+                if len(text) > max_length:
+                    max_length = len(text)
+                    best_text = text
+            except:
+                continue
+        
+        return best_text if best_text else pytesseract.image_to_string(thresh, lang='eng')
+        
     except Exception as e:
-        # Tesseract not available, return empty
-        return ""
+        # Fallback to simple extraction
+        try:
+            return pytesseract.image_to_string(image, lang='eng', config='--psm 6')
+        except:
+            return ""
 
 
 def parse_patient_data(text: str) -> dict:
     """Parse OCR text and extract patient fields using regex patterns."""
     
-    # Helper to extract field
-    def find(pattern, default=""):
-        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-        return match.group(1).strip() if match else default
+    # Helper to extract field with multiple patterns
+    def find_multi(patterns, default=""):
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            if match:
+                result = match.group(1).strip()
+                # Clean up common OCR errors
+                result = result.replace('|', 'I').replace('0', 'O').strip()
+                if len(result) > 1:  # Avoid single character matches
+                    return result
+        return default
     
-    # Clean up text - remove extra spaces
-    text = re.sub(r'\s+', ' ', text)
+    # Clean text - normalize spaces
+    text_normalized = re.sub(r'\s+', ' ', text)
     
-    # Extract name - look for pattern "Name * <text>"
-    name = find(r'Name\s*[*:]\s*([A-Za-z\s]+?)(?:\s+OP|Gender|Sex|\d|$)', "")
-    if not name or len(name) < 2:
-        # Try alternative: first capitalized word after "Name"
-        name = find(r'Name[^A-Z]*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', "")
+    # Extract NAME with multiple patterns
+    name_patterns = [
+        r'Name\s*[*:•]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',  # Arsifa
+        r'Name\s*[*:•]\s*([A-Za-z\s]+?)(?:\s+OP\s|Gender|Sex|Age)',
+        r'Name[:\s]+([A-Z][a-z]+)',
+    ]
+    name = find_multi(name_patterns, "")
     
-    # Extract OP number - various formats
-    op_no = find(r'OP\s*[Nn]o?\s*[*:]\s*([A-Z0-9/\-]+)', "")
-    if not op_no:
-        op_no = find(r'OP[:\s]+([A-Z0-9/\-]+)', "")
+    # Extract OP NUMBER with multiple patterns
+    op_patterns = [
+        r'OP\s*[Nn]o?\s*[*:•]\s*([CcGg][/\\]\d+[/\\]\d+)',  # C/18/557
+        r'OP\s*number\s*[*:•]?\s*([A-Z0-9/\\-]+)',
+        r'OP[:\s]+([A-Z0-9/\\-]+)',
+    ]
+    op_no = find_multi(op_patterns, "")
     
-    # Extract date - multiple formats
-    date = find(r'Date\s*[*:]\s*(\d{1,2}[-/]\s*[A-Za-z]{3,}[-/]\s*\d{2,4})', "")
-    if not date:
-        date = find(r'Date\s*[*:]\s*(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})', "")
+    # Extract DATE with multiple patterns
+    date_patterns = [
+        r'Date\s*[*:•]\s*(\d{1,2}\s*[/-]\s*[A-Za-z]{3,}\s*[/-]?\s*\d{0,4})',  # 18/Apr or 18/Apr/2024
+        r'Date\s*[*:•]\s*(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})',
+        r'Date[:\s]+(\d{1,2}\s*/\s*\w+)',
+    ]
+    date = find_multi(date_patterns, "")
     
-    # Extract age - look for digits near "Age"
-    age = find(r'Age\s*[*:]\s*(\d+)', "")
-    if not age:
-        age = find(r'(\d+)\s*(?:yrs|years|y|months|m)\b', "")
+    # Extract AGE - look for numbers after Age
+    age_patterns = [
+        r'Age\s*[*:•]\s*(\d+)\s*(?:yrs|years|months|m|y|\s|$)',
+        r'Age\s*[*:•]\s*(\d+)',
+        r'(?:Age|age)[:\s]+(\d+)',
+    ]
+    age = find_multi(age_patterns, "")
     
-    # Extract gender/sex - multiple patterns
+    # Extract GENDER/SEX
     sex = ""
-    # Check for explicit Male/Female
-    if re.search(r'\bMale\b', text, re.IGNORECASE) and not re.search(r'\bFemale\b', text, re.IGNORECASE):
+    if re.search(r'Sex\s*[*:•]\s*(?:M|Male)', text, re.IGNORECASE):
         sex = "Male"
-    elif re.search(r'\bFemale\b', text, re.IGNORECASE):
+    elif re.search(r'Sex\s*[*:•]\s*(?:F|Female)', text, re.IGNORECASE):
         sex = "Female"
-    # Check for M/F with boundaries
-    elif re.search(r'Sex\s*[*:]\s*M\b', text):
+    elif re.search(r'\bMale\b', text) and not re.search(r'\bFemale\b', text):
         sex = "Male"
-    elif re.search(r'Sex\s*[*:]\s*F\b', text):
+    elif re.search(r'\bFemale\b', text):
         sex = "Female"
     
-    # Extract guardian/parent name
-    guardian = find(r"(?:Parent|Guardian|Father|Mother)(?:'s)?\s*(?:/\s*Guardian(?:'s)?)?\s*name\s*[*:]\s*([A-Za-z\s]+?)(?:\s+Address|$)", "")
-    if not guardian:
-        guardian = find(r"Guardian\s*[*:]\s*([A-Za-z\s]+?)(?:\n|Address|$)", "")
+    # Extract GUARDIAN NAME - specific patterns for "Parent's / Guardian's name"
+    guardian_patterns = [
+        r"(?:Parent'?s?\s*/\s*Guardian'?s?\s*name|Guardian'?s?\s*name)\s*[*:•]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)",
+        r"Guardian\s*[*:•]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)",
+        r"Parent\s*[*:•]\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)",
+    ]
+    guardian = find_multi(guardian_patterns, "")
     
-    # Extract address
-    address = find(r'Address\s*[*:]\s*([A-Za-z0-9\s,.-]+?)(?:\n\n|Chief|Family|$)', "")
+    # Extract ADDRESS
+    address_patterns = [
+        r'Address\s*[*:•]\s*([A-Za-z0-9\s,.-]+?)(?:\n\n|Chief|Family|\Z)',
+        r'Address[:\s]+([^\n]+)',
+    ]
+    address = find_multi(address_patterns, "")
     
-    # Extract birth weight
-    birth_weight = find(r'Birth\s*[Ww]eight\s*[*:]?\s*(\d+)', "")
+    # Extract BIRTH WEIGHT
+    birth_weight_patterns = [
+        r'Birth\s*[Ww]eight\s*[*:•]?\s*(\d+)\s*(?:gms|grams|g)?',
+        r'[Ww]eight\s*[*:•]?\s*(\d{3,4})',
+    ]
+    birth_weight = find_multi(birth_weight_patterns, "")
     
-    # Extract gestation weeks
-    gestation_weeks = find(r'(?:Gestation|Weeks)\s*[*:]?\s*(\d+)', "")
+    # Extract GESTATION WEEKS
+    gestation_patterns = [
+        r'(?:Gestation|gestation)\s*[*:•]?\s*(\d+)\s*(?:weeks|wks|w)?',
+        r'(\d+)\s*weeks',
+    ]
+    gestation_weeks = find_multi(gestation_patterns, "")
     
-    # Check for various conditions - look for Yes(1) or checked boxes
-    def check_yes(keyword):
-        # Look for pattern like "keyword ... Yes(1)" or "keyword ... No(0)"
-        if re.search(rf'{keyword}.*?Yes\s*\(1\)', text, re.IGNORECASE):
-            return "1"
-        elif re.search(rf'{keyword}.*?No\s*\(0\)', text, re.IGNORECASE):
-            return "0"
+    # Check CHECKBOXES - look for Yes(1) or No(0) patterns
+    def check_field(keywords):
+        for keyword in keywords:
+            # Look for "keyword ... Yes(1)" pattern
+            if re.search(rf'{keyword}.*?Yes\s*\(\s*1\s*\)', text, re.IGNORECASE):
+                return "1"
+            # Look for checked boxes near keyword
+            if re.search(rf'{keyword}.*?(?:\[x\]|\[X\]|☑|✓)', text, re.IGNORECASE):
+                return "1"
+        # Look for explicit No(0)
+        for keyword in keywords:
+            if re.search(rf'{keyword}.*?No\s*\(\s*0\s*\)', text, re.IGNORECASE):
+                return "0"
         return ""
     
-    chief_complaints = {
-        "colour_perception": check_yes(r'Colour\s*perception'),
-        "moving_objects": check_yes(r'moving\s*objects'),
-        "longer_time": check_yes(r'Longer\s*time'),
-        "gaze_preference": check_yes(r'Gaze\s*preference'),
-        "looks_through": check_yes(r'Looks\s*through'),
-        "squint": check_yes(r'Squint'),
-        "seizures": check_yes(r'Seizures'),
-        "stumbling": check_yes(r'Stumbling'),
-    }
-    
     # Extract CNS field
-    cns = find(r'(?:CNS|CP|GDD|AUTISM)[:\s/]+([A-Za-z\s/]+?)(?:\n|Birth|$)', "")
+    cns_patterns = [
+        r'(?:CNS|CP|GDD|AUTISM)[:\s/]+([A-Za-z\s/]+?)(?:\n|Birth|$)',
+    ]
+    cns = find_multi(cns_patterns, "")
     
     return {
         "name": name,
@@ -123,11 +203,18 @@ def parse_patient_data(text: str) -> dict:
         "age": age,
         "guardian_name": guardian,
         "address": address,
-        **chief_complaints,
+        "colour_perception": check_field(['Colour perception', 'Color perception']),
+        "moving_objects": check_field(['moving objects', 'Better vision with moving']),
+        "longer_time": check_field(['Longer time', 'time to find']),
+        "gaze_preference": check_field(['Gaze preference', 'light gazing']),
+        "looks_through": check_field(['Looks through people']),
+        "squint": check_field(['Squint']),
+        "seizures": check_field(['Seizures']),
+        "stumbling": check_field(['Stumbling']),
         "gestation_weeks": gestation_weeks,
         "birth_weight": birth_weight,
         "cns": cns,
-        # Initialize remaining fields as empty
+        # Initialize remaining fields
         "attention_span": "",
         "favourite_things": "",
         "difficulty_new": "",

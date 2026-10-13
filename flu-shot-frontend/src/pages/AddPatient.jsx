@@ -72,6 +72,7 @@ function AddPatient() {
   useEffect(() => {
     // Check if PDF was passed from Patients page
     if (location.state?.pdfUrl) {
+      console.log('AddPatient - Location state:', location.state);
       setPdfUrl(location.state.pdfUrl);
       setPdfName(location.state.pdfName || 'Patient Form');
       setShowPdf(true);
@@ -79,9 +80,16 @@ function AddPatient() {
       // If OCR extracted data, pre-fill the form
       if (location.state?.extractedData) {
         const extracted = location.state.extractedData;
-        setBasicData(prev => ({ ...prev, ...extracted }));
+        console.log('AddPatient - Received extracted data:', extracted);
+        setBasicData(prev => {
+          const updated = { ...prev, ...extracted };
+          console.log('AddPatient - Updated basicData:', updated);
+          return updated;
+        });
         setPatientData(prev => ({ ...prev, ...extracted }));
         setOcrMessage(location.state.ocrMessage || '');
+      } else {
+        console.log('AddPatient - No extracted data in location.state');
       }
     }
   }, [location]);

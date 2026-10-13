@@ -221,7 +221,13 @@ async def extract_patient_from_pdf(file: UploadFile = File(...)):
             "pages_processed": min(len(images), 2),
             "message": message,
             "requires_manual_entry": requires_manual,
-            "raw_ocr_text": all_text if all_text.strip() else None,
+            "raw_ocr_text": all_text[:500] if all_text.strip() else None,  # First 500 chars for debugging
+            "debug_extraction": {
+                "name_found": bool(extracted_data.get("name")),
+                "op_no_found": bool(extracted_data.get("op_no")),
+                "age_found": bool(extracted_data.get("age")),
+                "total_fields_extracted": sum(1 for v in extracted_data.values() if v)
+            }
         }
 
     except Exception as e:

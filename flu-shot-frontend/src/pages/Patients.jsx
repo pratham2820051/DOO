@@ -51,14 +51,23 @@ function Patients() {
     try {
       const res = await extractPatientFromPDF(ocrFile);
       
+      // Debug logging
+      console.log('OCR Response:', res);
+      console.log('Extracted Data:', res.data);
+      if (res.debug_extraction) {
+        console.log('Debug Info:', res.debug_extraction);
+      }
+      
       // Create PDF blob URL
       const pdfUrl = URL.createObjectURL(ocrFile);
       
       if (res.requires_manual_entry) {
         // OCR not available, manual entry only
+        console.log('Manual entry mode - no OCR data');
         navigate('/add-patient', { state: { pdfUrl, pdfName: ocrFile.name } });
       } else {
         // OCR extracted data successfully
+        console.log('Navigating with extracted data:', res.data);
         navigate('/add-patient', { 
           state: { 
             pdfUrl, 
@@ -70,6 +79,7 @@ function Patients() {
       }
     } catch (err) {
       setOcrError('Upload failed: ' + err.message);
+      console.error('OCR Error:', err);
     } finally {
       setOcrLoading(false);
     }

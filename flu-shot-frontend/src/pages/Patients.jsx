@@ -50,9 +50,18 @@ function Patients() {
     setOcrSaveMsg('');
     try {
       const res = await extractPatientFromPDF(ocrFile);
-      setOcrResult(res.data);
+      if (res.requires_manual_entry) {
+        // PDF uploaded, redirect to Add Patient page for manual entry
+        setOcrError('⚠️ ' + res.message);
+        // Open Add Patient page in a way that user can reference the PDF
+        setTimeout(() => {
+          navigate('/add-patient');
+        }, 2000);
+      } else {
+        setOcrResult(res.data);
+      }
     } catch (err) {
-      setOcrError('Extraction failed: ' + err.message);
+      setOcrError('Upload failed: ' + err.message);
     } finally {
       setOcrLoading(false);
     }
@@ -116,7 +125,7 @@ function Patients() {
             </div>
 
             <p style={{ fontSize: '13px', color: '#666', marginBottom: '20px', lineHeight: 1.6 }}>
-              Upload a scanned CVI Clinic Proforma PDF. Gemini AI will extract the patient data automatically and pre-fill the record for you to review before saving.
+              Upload a scanned CVI Clinic Proforma PDF. The system will verify the PDF is readable, then guide you to enter the patient data manually while viewing the form.
             </p>
 
             {/* File picker */}
@@ -139,7 +148,7 @@ function Patients() {
 
             <button onClick={handleOCRUpload} disabled={ocrLoading || !ocrFile}
               style={{ width: '100%', padding: '12px', background: ocrLoading ? '#a78bfa' : '#7c3aed', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: 700, cursor: ocrLoading ? 'not-allowed' : 'pointer', marginBottom: '16px' }}>
-              {ocrLoading ? '🔍 Extracting with Gemini AI...' : '🚀 Extract Data'}
+              {ocrLoading ? '📄 Verifying PDF...' : '✅ Upload & Continue to Form'}
             </button>
 
             {/* Extracted data preview */}

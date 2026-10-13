@@ -290,11 +290,17 @@ async def extract_patient_from_pdf(file: UploadFile = File(...)):
             extracted_data = parse_patient_data(all_text)
             requires_manual = False
             message = "Data extracted successfully. Please review and correct any fields."
+            
+            # Log extraction for debugging
+            fields_found = sum(1 for v in extracted_data.values() if v)
+            print(f"[OCR] Extracted {fields_found} fields from {len(all_text)} chars of text")
+            print(f"[OCR] Name: {extracted_data.get('name')}, OP: {extracted_data.get('op_no')}, Age: {extracted_data.get('age')}")
         else:
             # No OCR available, return empty template
             extracted_data = parse_patient_data("")
             requires_manual = True
             message = "OCR not available. Please fill the form manually while viewing the PDF."
+            print(f"[OCR] No text extracted from PDF")
 
         return {
             "success": True,
@@ -307,7 +313,16 @@ async def extract_patient_from_pdf(file: UploadFile = File(...)):
                 "name_found": bool(extracted_data.get("name")),
                 "op_no_found": bool(extracted_data.get("op_no")),
                 "age_found": bool(extracted_data.get("age")),
-                "total_fields_extracted": sum(1 for v in extracted_data.values() if v)
+                "sex_found": bool(extracted_data.get("sex")),
+                "guardian_found": bool(extracted_data.get("guardian_name")),
+                "address_found": bool(extracted_data.get("address")),
+                "total_fields_extracted": sum(1 for v in extracted_data.values() if v),
+                "ocr_text_length": len(all_text),
+                "sample_values": {
+                    "name": extracted_data.get("name", "")[:20],
+                    "op_no": extracted_data.get("op_no", ""),
+                    "age": extracted_data.get("age", ""),
+                }
             }
         }
 

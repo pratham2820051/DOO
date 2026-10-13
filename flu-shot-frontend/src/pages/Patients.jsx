@@ -51,12 +51,10 @@ function Patients() {
     try {
       const res = await extractPatientFromPDF(ocrFile);
       if (res.requires_manual_entry) {
-        // PDF uploaded, redirect to Add Patient page for manual entry
-        setOcrError('⚠️ ' + res.message);
-        // Open Add Patient page in a way that user can reference the PDF
-        setTimeout(() => {
-          navigate('/add-patient');
-        }, 2000);
+        // Create PDF blob URL to pass to Add Patient page
+        const pdfUrl = URL.createObjectURL(ocrFile);
+        // Navigate with PDF URL
+        navigate('/add-patient', { state: { pdfUrl, pdfName: ocrFile.name } });
       } else {
         setOcrResult(res.data);
       }

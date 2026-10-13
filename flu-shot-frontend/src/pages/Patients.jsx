@@ -50,13 +50,23 @@ function Patients() {
     setOcrSaveMsg('');
     try {
       const res = await extractPatientFromPDF(ocrFile);
+      
+      // Create PDF blob URL
+      const pdfUrl = URL.createObjectURL(ocrFile);
+      
       if (res.requires_manual_entry) {
-        // Create PDF blob URL to pass to Add Patient page
-        const pdfUrl = URL.createObjectURL(ocrFile);
-        // Navigate with PDF URL
+        // OCR not available, manual entry only
         navigate('/add-patient', { state: { pdfUrl, pdfName: ocrFile.name } });
       } else {
-        setOcrResult(res.data);
+        // OCR extracted data successfully
+        navigate('/add-patient', { 
+          state: { 
+            pdfUrl, 
+            pdfName: ocrFile.name,
+            extractedData: res.data,
+            ocrMessage: res.message 
+          } 
+        });
       }
     } catch (err) {
       setOcrError('Upload failed: ' + err.message);

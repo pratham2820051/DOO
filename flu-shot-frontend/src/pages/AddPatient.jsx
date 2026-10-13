@@ -67,6 +67,7 @@ function AddPatient() {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfName, setPdfName] = useState('');
   const [showPdf, setShowPdf] = useState(false);
+  const [ocrMessage, setOcrMessage] = useState('');
 
   useEffect(() => {
     // Check if PDF was passed from Patients page
@@ -74,6 +75,14 @@ function AddPatient() {
       setPdfUrl(location.state.pdfUrl);
       setPdfName(location.state.pdfName || 'Patient Form');
       setShowPdf(true);
+      
+      // If OCR extracted data, pre-fill the form
+      if (location.state?.extractedData) {
+        const extracted = location.state.extractedData;
+        setBasicData(prev => ({ ...prev, ...extracted }));
+        setPatientData(prev => ({ ...prev, ...extracted }));
+        setOcrMessage(location.state.ocrMessage || '');
+      }
     }
   }, [location]);
 
@@ -201,6 +210,17 @@ function AddPatient() {
       <div style={{ marginBottom: '20px' }}>
         <h2 style={{ margin: 0 }}>Add New Patient Assessment</h2>
       </div>
+
+      {/* OCR success message */}
+      {ocrMessage && (
+        <div style={{
+          margin: '10px 0', padding: '12px 16px', borderRadius: '8px',
+          fontSize: '14px', fontWeight: '600',
+          background: '#f0fdf4', color: '#15803d', border: '1px solid #86efac',
+        }}>
+          ✅ {ocrMessage}
+        </div>
+      )}
 
       {/* Error banner with shake */}
       {saveMsg && (

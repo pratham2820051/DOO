@@ -224,6 +224,21 @@ function BasicInfo({ onDataChange, initialData }) {
           <Radio name="cns" value="GDD" label="GDD" />
           <Radio name="cns" value="AUTISM" label="AUTISM" />
           <Radio name="cns" value="None" label="None" />
+          / <input 
+              type="text" 
+              name="cns_other" 
+              value={formData.cns_other || ''} 
+              onChange={handleChange}
+              style={{ 
+                border: 'none',
+                borderBottom: '1px solid #000',
+                width: '200px',
+                fontSize: '14px',
+                padding: '2px 4px',
+                outline: 'none'
+              }} 
+              placeholder="other..."
+            />
           <br /><br />
 
           <strong>Auditory anomaly:</strong>

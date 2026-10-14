@@ -219,54 +219,12 @@ function BasicInfo({ onDataChange, initialData }) {
           <strong>Nutritional status:</strong>
           <textarea name="nutritional_status" value={formData.nutritional_status} onChange={handleChange} rows="3" style={{ width: '100%', border: '1px solid #999', fontSize: '14px', padding: '4px', resize: 'vertical' }}></textarea>
 
-          <h4>CNS: &nbsp; 
-            <select 
-              name="cns" 
-              value={formData.cns || ''} 
-              onChange={handleChange}
-              style={{ 
-                border: '1px solid #999', 
-                borderRadius: '4px',
-                padding: '4px 8px',
-                fontSize: '14px',
-                width: '200px',
-                backgroundColor: '#fff',
-                cursor: 'pointer'
-              }}
-            >
-              <option value="">-- Select --</option>
-              <option value="CP">CP (Cerebral Palsy)</option>
-              <option value="GDD">GDD (Global Developmental Delay)</option>
-              <option value="AUTISM">AUTISM</option>
-              <option value="CP/GDD">CP / GDD</option>
-              <option value="CP/AUTISM">CP / AUTISM</option>
-              <option value="GDD/AUTISM">GDD / AUTISM</option>
-              <option value="CP/GDD/AUTISM">CP / GDD / AUTISM</option>
-              <option value="None">None</option>
-              <option value="Other">Other</option>
-            </select>
-            {formData.cns === 'Other' && (
-              <input 
-                type="text" 
-                name="cns_other" 
-                value={formData.cns_other || ''} 
-                onChange={(e) => {
-                  const updated = { ...formData, cns_other: e.target.value };
-                  setFormData(updated);
-                  if (onDataChange) onDataChange(updated);
-                }}
-                style={{ 
-                  border: '1px solid #999',
-                  borderRadius: '4px',
-                  marginLeft: '8px',
-                  width: '150px',
-                  fontSize: '14px',
-                  padding: '4px 8px'
-                }} 
-                placeholder="Specify other..."
-              />
-            )}
-          </h4>
+          <strong>CNS:</strong><br />
+          <Radio name="cns" value="CP" label="CP" />
+          <Radio name="cns" value="GDD" label="GDD" />
+          <Radio name="cns" value="AUTISM" label="AUTISM" />
+          <Radio name="cns" value="None" label="None" />
+          <br /><br />
 
           <strong>Auditory anomaly:</strong>
           <Radio name="auditory_anomaly" value="0" label="absent(0)" /><Radio name="auditory_anomaly" value="1" label="present(1)" />

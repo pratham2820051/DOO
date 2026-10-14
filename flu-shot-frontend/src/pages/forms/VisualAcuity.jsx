@@ -3,6 +3,7 @@ import { useState } from 'react';
 function VisualAcuity({ onDataChange }) {
   const [d, setD] = useState({
     fixes_re_num: '', fixes_re_den: '', fixes_le_num: '', fixes_le_den: '',
+    fixes_re_text: '', fixes_le_text: '', // Add text fields for non-numeric values
     teller_re_38_1: '', teller_re_55_1: '', teller_re_84_1: '',
     teller_le_38_1: '', teller_le_55_1: '', teller_le_84_1: '',
     teller_re_38_2: '', teller_re_55_2: '', teller_re_84_2: '',
@@ -35,8 +36,52 @@ function VisualAcuity({ onDataChange }) {
         <tbody>
           <tr>
             <td>Fixes / Follows Light</td>
-            <td><div className="fraction-box"><input type="text" name="fixes_re_num" value={d.fixes_re_num} onChange={h} /><span>/</span><input type="text" name="fixes_re_den" value={d.fixes_re_den} onChange={h} /></div></td>
-            <td><div className="fraction-box"><input type="text" name="fixes_le_num" value={d.fixes_le_num} onChange={h} /><span>/</span><input type="text" name="fixes_le_den" value={d.fixes_le_den} onChange={h} /></div></td>
+            <td>
+              <div className="fraction-box">
+                <input type="text" name="fixes_re_num" value={d.fixes_re_num} onChange={h} style={{ width: '40px' }} />
+                <span>/</span>
+                <input type="text" name="fixes_re_den" value={d.fixes_re_den} onChange={h} style={{ width: '40px' }} />
+              </div>
+              <div style={{ marginTop: '4px' }}>
+                <input 
+                  type="text" 
+                  name="fixes_re_text" 
+                  value={d.fixes_re_text} 
+                  onChange={h} 
+                  placeholder="or text (e.g., Follows light)" 
+                  style={{ 
+                    width: '100%', 
+                    fontSize: '13px', 
+                    padding: '4px',
+                    border: '1px solid #ddd',
+                    borderRadius: '3px'
+                  }} 
+                />
+              </div>
+            </td>
+            <td>
+              <div className="fraction-box">
+                <input type="text" name="fixes_le_num" value={d.fixes_le_num} onChange={h} style={{ width: '40px' }} />
+                <span>/</span>
+                <input type="text" name="fixes_le_den" value={d.fixes_le_den} onChange={h} style={{ width: '40px' }} />
+              </div>
+              <div style={{ marginTop: '4px' }}>
+                <input 
+                  type="text" 
+                  name="fixes_le_text" 
+                  value={d.fixes_le_text} 
+                  onChange={h} 
+                  placeholder="or text (e.g., Follows light)" 
+                  style={{ 
+                    width: '100%', 
+                    fontSize: '13px', 
+                    padding: '4px',
+                    border: '1px solid #ddd',
+                    borderRadius: '3px'
+                  }} 
+                />
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>

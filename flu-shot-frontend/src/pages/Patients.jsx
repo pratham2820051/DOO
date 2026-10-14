@@ -104,6 +104,120 @@ function Patients() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (patients.length === 0) {
+      alert('No patients to export');
+      return;
+    }
+
+    // Define all CSV headers including all fields
+    const headers = [
+      // Basic Info
+      'ID', 'Name', 'OP No', 'Date', 'Sex', 'Age', 'Guardian Name', 'Address',
+      // Chief Complaints
+      'Colour Perception', 'Moving Objects', 'Longer Time', 'Gaze Preference', 
+      'Looks Through', 'Attention Span', 'Squint', 'Seizures', 'Stumbling', 
+      'Favourite Things', 'Difficulty New',
+      // Birth History
+      'Fever Rashes', 'PIH', 'Others Antenatal', 'Gestation Weeks', 
+      'Gestation Type', 'Birth Weight', 'Delivery', 'Cry',
+      // APGAR
+      'Oxygen Therapy', 'Jaundice', 'Convulsions', 'Hyperglycemia', 
+      'Chorioamnionitis', 'Milestones',
+      // Family History
+      'Consanguinity', 'Nutritional Status', 'CNS', 'Auditory Anomaly',
+      // Ocular Examination
+      'EOM', 'Visual Axes', 'Binocular', 'Anterior Segment', 
+      'Posterior Segment', 'Nystagmus',
+      // JSON Data fields (stored as stringified JSON)
+      'Visual Acuity Data', 'CVI Screening Data', 'CVI Range 3-8 Data', 
+      'CVI Range 9-10 Data', 'ICF Framework Data', 'PQCVI Data',
+      // Metadata
+      'Created At'
+    ];
+
+    // Convert patients to CSV rows
+    const rows = patients.map(p => [
+      p.id || '',
+      p.name || '',
+      p.op_no || '',
+      p.date || '',
+      p.sex || '',
+      p.age || '',
+      p.guardian_name || '',
+      p.address || '',
+      p.colour_perception || '',
+      p.moving_objects || '',
+      p.longer_time || '',
+      p.gaze_preference || '',
+      p.looks_through || '',
+      p.attention_span || '',
+      p.squint || '',
+      p.seizures || '',
+      p.stumbling || '',
+      p.favourite_things || '',
+      p.difficulty_new || '',
+      p.fever_rashes || '',
+      p.pih || '',
+      p.others_antenatal || '',
+      p.gestation_weeks || '',
+      p.gestation_type || '',
+      p.birth_weight || '',
+      p.delivery || '',
+      p.cry || '',
+      p.oxygen_therapy || '',
+      p.jaundice || '',
+      p.convulsions || '',
+      p.hyperglycemia || '',
+      p.chorioamnionitis || '',
+      p.milestones || '',
+      p.consanguinity || '',
+      p.nutritional_status || '',
+      p.cns || '',
+      p.auditory_anomaly || '',
+      p.eom || '',
+      p.visual_axes || '',
+      p.binocular || '',
+      p.anterior_segment || '',
+      p.posterior_segment || '',
+      p.nystagmus || '',
+      p.visual_acuity_data || '',
+      p.cvi_screening_data || '',
+      p.cvi_range38_data || '',
+      p.cvi_range910_data || '',
+      p.icf_framework_data || '',
+      p.pqcvi_data || '',
+      p.created_at || ''
+    ]);
+
+    // Escape CSV values (handle commas, quotes, newlines)
+    const escapeCSV = (value) => {
+      if (value === null || value === undefined) return '';
+      const str = String(value);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    // Build CSV content
+    const csvContent = [
+      headers.map(escapeCSV).join(','),
+      ...rows.map(row => row.map(escapeCSV).join(','))
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cvi_patients_export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="patients-page">
       {/* Confirm Delete Modal */}
@@ -126,6 +240,13 @@ function Patients() {
       <div className="patients-header">
         <h2>All Patients</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={handleExportCSV}
+            style={{ padding: '10px 18px', background: '#059669', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+            title="Export all patient data to CSV"
+          >
+            📊 Export CSV
+          </button>
           <button
             onClick={() => { setShowOCR(true); setOcrFile(null); setOcrResult(null); setOcrError(''); setOcrSaveMsg(''); }}
             style={{ padding: '10px 18px', background: '#7c3aed', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}

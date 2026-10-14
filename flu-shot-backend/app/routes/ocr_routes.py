@@ -308,7 +308,7 @@ async def extract_patient_from_pdf(file: UploadFile = File(...)):
             "pages_processed": min(len(images), 2),
             "message": message,
             "requires_manual_entry": requires_manual,
-            "raw_ocr_text": all_text[:500] if all_text.strip() else None,  # First 500 chars for debugging
+            "raw_ocr_text": all_text[:1000] if all_text.strip() else None,  # First 1000 chars for debugging
             "debug_extraction": {
                 "name_found": bool(extracted_data.get("name")),
                 "op_no_found": bool(extracted_data.get("op_no")),

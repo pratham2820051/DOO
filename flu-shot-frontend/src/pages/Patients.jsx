@@ -57,6 +57,9 @@ function Patients() {
       if (res.debug_extraction) {
         console.log('Debug Info:', res.debug_extraction);
       }
+      if (res.raw_ocr_text) {
+        console.log('Raw OCR Text (first 1000 chars):\n', res.raw_ocr_text);
+      }
       
       // Create PDF blob URL
       const pdfUrl = URL.createObjectURL(ocrFile);

@@ -129,6 +129,8 @@ function Patients() {
       // Ocular Examination
       'EOM', 'Visual Axes', 'Binocular', 'Anterior Segment', 
       'Posterior Segment', 'Nystagmus',
+      // Pedigree
+      'Pedigree Image',
       // JSON Data fields (stored as stringified JSON)
       'Visual Acuity Data', 'CVI Screening Data', 'CVI Range 3-8 Data', 
       'CVI Range 9-10 Data', 'ICF Framework Data', 'PQCVI Data',
@@ -181,6 +183,7 @@ function Patients() {
       p.anterior_segment || '',
       p.posterior_segment || '',
       p.nystagmus || '',
+      p.pedigree_image || '',
       p.visual_acuity_data || '',
       p.cvi_screening_data || '',
       p.cvi_range38_data || '',

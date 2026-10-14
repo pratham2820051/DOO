@@ -14,7 +14,7 @@ function VisualAcuity({ onDataChange }) {
     subj_le_sph: '', subj_le_cyl: '', subj_le_axis: '',
     ophthalmic_diagnosis: '', electro_bera: '', mri_type: '', mri_notes: '',
     dev_quotient: '', paediatric_diagnosis: '',
-    cvi_range_1: '', total_score_1: '', cvi_range_notes: '', // Added notes field
+    overall_cvi_range_text: '', cvi_range_1: '', total_score_1: '', cvi_range_notes: '', // Added inline text field
     followup_date: '', fluctuation_vision: '', dq_iq: '',
     followup_re: '', followup_le: '',
     followup_re_38: '', followup_re_55: '', followup_re_84: '',
@@ -159,7 +159,24 @@ function VisualAcuity({ onDataChange }) {
       <div className="section-label">Paediatric diagnosis:</div>
       <input type="text" name="paediatric_diagnosis" value={d.paediatric_diagnosis} onChange={h} style={{ width: '100%', border: '1px solid #000', padding: '5px', fontSize: '12px', marginBottom: '10px' }} />
 
-      <h4>OVERALL CVI RANGE:</h4>
+      <h4>OVERALL CVI RANGE: 
+        <input 
+          type="text" 
+          name="overall_cvi_range_text" 
+          value={d.overall_cvi_range_text} 
+          onChange={h}
+          style={{ 
+            border: 'none',
+            borderBottom: '1px solid #000',
+            width: '300px',
+            fontSize: '14px',
+            padding: '2px 8px',
+            marginLeft: '10px',
+            outline: 'none'
+          }} 
+          placeholder="type here..."
+        />
+      </h4>
       <div className="inline-field">RATING 1: CVI RANGE <input type="text" name="cvi_range_1" value={d.cvi_range_1} onChange={h} /></div><br />
       <div className="inline-field">RATING 2: TOTAL SCORE <input type="text" name="total_score_1" value={d.total_score_1} onChange={h} /></div>
       <br />

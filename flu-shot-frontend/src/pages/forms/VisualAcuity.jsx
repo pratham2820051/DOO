@@ -14,7 +14,7 @@ function VisualAcuity({ onDataChange }) {
     subj_le_sph: '', subj_le_cyl: '', subj_le_axis: '',
     ophthalmic_diagnosis: '', electro_bera: '', mri_type: '', mri_notes: '',
     dev_quotient: '', paediatric_diagnosis: '',
-    cvi_range_1: '', total_score_1: '',
+    cvi_range_1: '', total_score_1: '', cvi_range_notes: '', // Added notes field
     followup_date: '', fluctuation_vision: '', dq_iq: '',
     followup_re: '', followup_le: '',
     followup_re_38: '', followup_re_55: '', followup_re_84: '',
@@ -162,7 +162,27 @@ function VisualAcuity({ onDataChange }) {
       <h4>OVERALL CVI RANGE:</h4>
       <div className="inline-field">RATING 1: CVI RANGE <input type="text" name="cvi_range_1" value={d.cvi_range_1} onChange={h} /></div><br />
       <div className="inline-field">RATING 2: TOTAL SCORE <input type="text" name="total_score_1" value={d.total_score_1} onChange={h} /></div>
-      <br /><br />
+      <br />
+      <div style={{ marginTop: '10px' }}>
+        <strong>Additional Notes:</strong><br />
+        <textarea 
+          name="cvi_range_notes" 
+          value={d.cvi_range_notes} 
+          onChange={h}
+          placeholder="Enter additional CVI range observations..."
+          style={{ 
+            width: '100%', 
+            minHeight: '60px',
+            border: '1px solid #999', 
+            borderRadius: '4px',
+            padding: '8px',
+            fontSize: '13px',
+            fontFamily: 'inherit',
+            resize: 'vertical'
+          }}
+        />
+      </div>
+      <br />
 
       <h4>FOLLOW UP:</h4>
       <div className="inline-field">DATE: <input type="date" name="followup_date" value={d.followup_date} onChange={h} /></div><br />
